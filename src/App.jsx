@@ -13,6 +13,7 @@ function App() {
   const [selectedBook, setSelectedBook] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [ratingFilter, setRatingFilter] = useState(null)
+  const [genreFilter, setGenreFilter] = useState('')
   const [sortBy, setSortBy] = useState('rating-asc')
 
   useEffect(() => {
@@ -32,12 +33,14 @@ function App() {
     let next = books.filter((book) => {
       const matchSearch =
         !searchQuery ||
-        [book.title, book.author, book.justification].some((s) =>
+        [book.title, book.author, book.justification, ...book.genres].some((s) =>
           s.toLowerCase().includes(searchQuery.toLowerCase())
         )
       const matchRating =
         ratingFilter == null || book.rating === ratingFilter
-      return matchSearch && matchRating
+      const matchGenre =
+        !genreFilter || book.genres.includes(genreFilter)
+      return matchSearch && matchRating && matchGenre
     })
 
     if (sortBy === 'rating-asc') {
@@ -46,7 +49,11 @@ function App() {
       next = [...next].sort((a, b) => a.title.localeCompare(b.title))
     }
     setFilteredBooks(next)
-  }, [books, searchQuery, ratingFilter, sortBy])
+  }, [books, searchQuery, ratingFilter, genreFilter, sortBy])
+
+  const availableGenres = Array.from(
+    new Set(books.flatMap((book) => book.genres))
+  ).sort((a, b) => a.localeCompare(b))
 
   const handleCloseDrawer = () => setSelectedBook(null)
 
@@ -64,6 +71,9 @@ function App() {
           onSearchChange={setSearchQuery}
           ratingFilter={ratingFilter}
           onRatingFilterChange={setRatingFilter}
+          genreFilter={genreFilter}
+          onGenreFilterChange={setGenreFilter}
+          availableGenres={availableGenres}
           sortBy={sortBy}
           onSortByChange={setSortBy}
           resultCount={filteredBooks.length}

@@ -225,6 +225,10 @@ body {
   background: #fff;
 }
 
+.filters__genre {
+  min-width: 220px;
+}
+
 .filters__count {
   font-size: 0.9rem;
   color: #718096;
@@ -297,6 +301,25 @@ body {
   margin: 0;
   font-size: 0.9rem;
   color: #718096;
+}
+
+.book-card__genres {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.book-card__genre {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #2d3748;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
 }
 
 .book-card__rating {
@@ -383,6 +406,25 @@ body {
   margin: 0.35rem 0 0;
   font-size: 1rem;
   color: #718096;
+}
+
+.drawer__genres {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.drawer__genre {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2d3748;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
 }
 
 .drawer__rating {

@@ -18,6 +18,15 @@ function BookCard({ book, onClick }) {
       <div className="book-card__header">
         <h2 className="book-card__title">{book.title}</h2>
         <p className="book-card__author">{book.author}</p>
+        {book.genres.length > 0 && (
+          <ul className="book-card__genres" aria-label="Genres">
+            {book.genres.map((genre) => (
+              <li key={`${book.slug}-${genre}`} className="book-card__genre">
+                {genre}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <span
         className="book-card__rating"

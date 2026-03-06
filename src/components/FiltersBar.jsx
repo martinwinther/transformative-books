@@ -3,6 +3,9 @@ function FiltersBar({
   onSearchChange,
   ratingFilter,
   onRatingFilterChange,
+  genreFilter,
+  onGenreFilterChange,
+  availableGenres,
   sortBy,
   onSortByChange,
   resultCount,
@@ -22,6 +25,28 @@ function FiltersBar({
           onChange={(e) => onSearchChange(e.target.value)}
           aria-label="Search books by title, author, or description"
         />
+      </div>
+      <div className="filters__row filters__row--sort">
+        <label htmlFor="genre-filter" className="filters__label">
+          Genre
+        </label>
+        <select
+          id="genre-filter"
+          className="filters__sort filters__genre"
+          value={genreFilter}
+          onChange={(e) => onGenreFilterChange(e.target.value)}
+          aria-label="Filter by genre"
+          disabled={availableGenres.length === 0}
+        >
+          <option value="">
+            {availableGenres.length === 0 ? 'No genres yet' : 'All genres'}
+          </option>
+          {availableGenres.map((genre) => (
+            <option key={genre} value={genre}>
+              {genre}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="filters__row">
         <span className="filters__label">Difficulty</span>

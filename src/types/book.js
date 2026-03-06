@@ -3,6 +3,7 @@
  * @property {string} author
  * @property {string} title
  * @property {number} rating
+ * @property {string[]} genres
  * @property {string} justification
  * @property {string} expandedJustification
  * @property {string} transformativeExperience

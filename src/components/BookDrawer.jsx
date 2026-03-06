@@ -50,6 +50,15 @@ function BookDrawer({ book, onClose }) {
             {book.title}
           </h2>
           <p className="drawer__author">{book.author}</p>
+          {book.genres.length > 0 && (
+            <ul className="drawer__genres" aria-label="Genres">
+              {book.genres.map((genre) => (
+                <li key={`${book.slug}-drawer-${genre}`} className="drawer__genre">
+                  {genre}
+                </li>
+              ))}
+            </ul>
+          )}
           <span
             className="drawer__rating"
             data-rating={book.rating}

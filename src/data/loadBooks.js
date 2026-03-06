@@ -47,6 +47,57 @@ function buildSlug(author, title) {
     .replace(/^-|-$/g, '')
 }
 
+const MAX_GENRES_PER_BOOK = 3
+
+/**
+ * Parse and normalize genres from a single CSV cell.
+ * Accepts pipe-separated values (primary), with comma/semicolon fallback.
+ * @param {string} raw
+ * @returns {string[]}
+ */
+function parseGenresFromCell(raw) {
+  if (!raw) return []
+  const parts = raw
+    .split(/[|;,]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  const seen = new Set()
+  const genres = []
+  for (const part of parts) {
+    const key = part.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    genres.push(part)
+    if (genres.length === MAX_GENRES_PER_BOOK) break
+  }
+  return genres
+}
+
+/**
+ * Parse and normalize genres from either a unified Genres column or
+ * up to 3 legacy columns (Genre1/Genre2/Genre3).
+ * @param {string[]} cells
+ * @param {number} genresIdx
+ * @param {number} genre1Idx
+ * @param {number} genre2Idx
+ * @param {number} genre3Idx
+ * @returns {string[]}
+ */
+function parseGenres(cells, genresIdx, genre1Idx, genre2Idx, genre3Idx) {
+  if (genresIdx >= 0) {
+    return parseGenresFromCell((cells[genresIdx] ?? '').trim())
+  }
+
+  const parts = [genre1Idx, genre2Idx, genre3Idx]
+    .filter((idx) => idx >= 0)
+    .map((idx) => (cells[idx] ?? '').trim())
+    .filter(Boolean)
+
+  if (parts.length === 0) return []
+  return parseGenresFromCell(parts.join('|'))
+}
+
 /**
  * Fetch and parse the books CSV into Book objects.
  * @returns {Promise<import('../types/book.js').Book[]>}
@@ -80,6 +131,10 @@ export async function loadBooks() {
   const transformativeIdx = header.findIndex(
     (h) => h.toLowerCase().replace(/\s/g, '') === 'transformativeexperience'
   )
+  const genresIdx = header.findIndex((h) => h.toLowerCase() === 'genres' || h.toLowerCase() === 'genre')
+  const genre1Idx = header.findIndex((h) => h.toLowerCase() === 'genre1')
+  const genre2Idx = header.findIndex((h) => h.toLowerCase() === 'genre2')
+  const genre3Idx = header.findIndex((h) => h.toLowerCase() === 'genre3')
 
   if (
     authorIdx < 0 ||
@@ -107,11 +162,13 @@ export async function loadBooks() {
       transformativeIdx >= 0 ? (cells[transformativeIdx] ?? '').trim() : ''
     const transformativeExperience =
       transformativeRaw || TRANSFORMATIVE_PLACEHOLDER
+    const genres = parseGenres(cells, genresIdx, genre1Idx, genre2Idx, genre3Idx)
 
     books.push({
       author,
       title,
       rating,
+      genres,
       justification,
       expandedJustification: expandedJustification || justification,
       transformativeExperience,
