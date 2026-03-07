@@ -47,6 +47,19 @@ function buildSlug(author, title) {
     .replace(/^-|-$/g, '')
 }
 
+/**
+ * Normalize external URLs from CSV to safe absolute links.
+ * @param {string} raw
+ * @returns {string}
+ */
+function normalizeUrl(raw) {
+  const value = (raw ?? '').trim()
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith('www.')) return `https://${value}`
+  return ''
+}
+
 const MAX_GENRES_PER_BOOK = 3
 
 /**
@@ -135,6 +148,10 @@ export async function loadBooks() {
   const genre1Idx = header.findIndex((h) => h.toLowerCase() === 'genre1')
   const genre2Idx = header.findIndex((h) => h.toLowerCase() === 'genre2')
   const genre3Idx = header.findIndex((h) => h.toLowerCase() === 'genre3')
+  const amazonLinkIdx = header.findIndex((h) => {
+    const key = h.toLowerCase().replace(/\s|_/g, '')
+    return key === 'link' || key === 'amazonlink' || key === 'amazonurl' || key === 'amazon'
+  })
 
   if (
     authorIdx < 0 ||
@@ -163,6 +180,8 @@ export async function loadBooks() {
     const transformativeExperience =
       transformativeRaw || TRANSFORMATIVE_PLACEHOLDER
     const genres = parseGenres(cells, genresIdx, genre1Idx, genre2Idx, genre3Idx)
+    const amazonLink =
+      amazonLinkIdx >= 0 ? normalizeUrl(cells[amazonLinkIdx] ?? '') : ''
 
     books.push({
       author,
@@ -172,6 +191,7 @@ export async function loadBooks() {
       justification,
       expandedJustification: expandedJustification || justification,
       transformativeExperience,
+      amazonLink,
       slug: buildSlug(author, title),
     })
   }

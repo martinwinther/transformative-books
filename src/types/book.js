@@ -7,6 +7,7 @@
  * @property {string} justification
  * @property {string} expandedJustification
  * @property {string} transformativeExperience
+ * @property {string} amazonLink
  * @property {string} slug
  */
 

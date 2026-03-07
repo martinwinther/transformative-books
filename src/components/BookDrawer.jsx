@@ -66,6 +66,23 @@ function BookDrawer({ book, onClose }) {
           >
             Difficulty: {book.rating}/5
           </span>
+          {book.amazonLink && (
+            <a
+              className="drawer__amazon"
+              href={book.amazonLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Buy ${book.title} on Amazon`}
+            >
+              <span className="drawer__amazon-mark" aria-hidden="true">
+                <svg viewBox="0 0 48 24" role="presentation" focusable="false">
+                  <path d="M6 7c6 5 17 8 28 4" />
+                  <path d="M31.5 11.4l2.7-.6-1.2 2.5" />
+                </svg>
+              </span>
+              <span className="drawer__amazon-text">Amazon</span>
+            </a>
+          )}
           <button
             type="button"
             className="drawer__close"
