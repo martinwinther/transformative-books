@@ -15,6 +15,7 @@ function BookCard({ book, onClick }) {
       tabIndex={0}
       aria-label={`Open details for ${book.title} by ${book.author}`}
     >
+      <p className="book-card__kicker">Transformative read</p>
       <div className="book-card__header">
         <h2 className="book-card__title">{book.title}</h2>
         <p className="book-card__author">{book.author}</p>
@@ -36,6 +37,7 @@ function BookCard({ book, onClick }) {
         {book.rating}
       </span>
       <p className="book-card__description">{book.justification}</p>
+      <span className="book-card__cta" aria-hidden="true">Read rationale →</span>
     </article>
   )
 }
