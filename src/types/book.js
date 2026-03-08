@@ -42,3 +42,9 @@ export const RATING_SCALE = [
       'Extremely difficult to comprehend without companion materials; discussion with an expert or professor is advised.',
   },
 ]
+
+/**
+ * @typedef {Object} BookProgress
+ * @property {boolean} isRead
+ * @property {string} notes
+ */

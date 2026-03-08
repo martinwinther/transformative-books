@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-function BookDrawer({ book, onClose }) {
+function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -29,6 +29,9 @@ function BookDrawer({ book, onClose }) {
   }
 
   if (!book) return null
+
+  const notes = progress?.notes ?? ''
+  const isRead = progress?.isRead === true
 
   return (
     <div
@@ -93,6 +96,29 @@ function BookDrawer({ book, onClose }) {
           </button>
         </div>
         <div className="drawer__body">
+          <section className="drawer__section drawer__section--tracker">
+            <h3 className="drawer__section-title">Your tracker</h3>
+            <label className="drawer__read-toggle">
+              <input
+                type="checkbox"
+                checked={isRead}
+                onChange={(e) => onReadChange(book.slug, e.target.checked)}
+              />
+              <span>I&apos;ve read this book</span>
+            </label>
+            <label className="drawer__notes-label" htmlFor={`notes-${book.slug}`}>
+              Personal notes
+            </label>
+            <textarea
+              id={`notes-${book.slug}`}
+              className="drawer__notes"
+              value={notes}
+              onChange={(e) => onNotesChange(book.slug, e.target.value)}
+              placeholder="Capture your reflections, favorite passages, or what changed for you."
+              rows={7}
+            />
+            <p className="drawer__notes-help">Saved locally in this browser for now.</p>
+          </section>
           <section className="drawer__section">
             <h3 className="drawer__section-title">Summary</h3>
             <p className="drawer__justification">{book.justification}</p>

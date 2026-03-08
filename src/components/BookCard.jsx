@@ -1,10 +1,12 @@
-function BookCard({ book, onClick }) {
+function BookCard({ book, progress, onClick }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onClick(book)
     }
   }
+
+  const hasNotes = Boolean(progress?.notes?.trim())
 
   return (
     <article
@@ -16,6 +18,12 @@ function BookCard({ book, onClick }) {
       aria-label={`Open details for ${book.title} by ${book.author}`}
     >
       <p className="book-card__kicker">Transformative read</p>
+      {(progress?.isRead || hasNotes) && (
+        <div className="book-card__status" aria-label="Your reading progress">
+          {progress?.isRead && <span className="book-card__status-pill book-card__status-pill--read">Read</span>}
+          {hasNotes && <span className="book-card__status-pill">Notes</span>}
+        </div>
+      )}
       <div className="book-card__header">
         <h2 className="book-card__title">{book.title}</h2>
         <p className="book-card__author">{book.author}</p>
@@ -37,6 +45,11 @@ function BookCard({ book, onClick }) {
         {book.rating}
       </span>
       <p className="book-card__description">{book.justification}</p>
+      {hasNotes && (
+        <p className="book-card__notes-preview">
+          {progress.notes}
+        </p>
+      )}
       <span className="book-card__cta" aria-hidden="true">Read rationale →</span>
     </article>
   )

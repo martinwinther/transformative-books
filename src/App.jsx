@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { loadBooks } from './data/loadBooks.js'
+import { loadBookProgress, saveBookProgress } from './data/bookProgress.js'
 import BookCard from './components/BookCard.jsx'
 import BookDrawer from './components/BookDrawer.jsx'
 import FiltersBar from './components/FiltersBar.jsx'
@@ -15,6 +16,7 @@ function App() {
   const [ratingFilter, setRatingFilter] = useState(null)
   const [genreFilter, setGenreFilter] = useState('')
   const [sortBy, setSortBy] = useState('rating-asc')
+  const [readerProgress, setReaderProgress] = useState(() => loadBookProgress())
   const [theme, setTheme] = useState(() => {
     const storedTheme = window.localStorage.getItem('tb-theme')
     if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme
@@ -61,12 +63,43 @@ function App() {
     window.localStorage.setItem('tb-theme', theme)
   }, [theme])
 
+  useEffect(() => {
+    saveBookProgress(readerProgress)
+  }, [readerProgress])
+
   const availableGenres = Array.from(
     new Set(books.flatMap((book) => book.genres))
   ).sort((a, b) => a.localeCompare(b))
+  const completedCount = books.filter((book) => readerProgress[book.slug]?.isRead).length
 
   const handleCloseDrawer = () => setSelectedBook(null)
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+  const updateBookProgress = (slug, patch) => {
+    setReaderProgress((prev) => {
+      const current = prev[slug] ?? { isRead: false, notes: '' }
+      const nextEntry = {
+        ...current,
+        ...patch,
+      }
+      const next = { ...prev }
+
+      if (!nextEntry.isRead && !nextEntry.notes.trim()) {
+        delete next[slug]
+        return next
+      }
+
+      next[slug] = nextEntry
+      return next
+    })
+  }
+
+  const handleReadChange = (slug, isRead) => {
+    updateBookProgress(slug, { isRead })
+  }
+
+  const handleNotesChange = (slug, notes) => {
+    updateBookProgress(slug, { notes })
+  }
 
   return (
     <div className="app">
@@ -90,7 +123,7 @@ function App() {
         <div className="hero__stats" aria-label="Catalog overview">
           <span className="hero__stat glass-subtle">{books.length} titles</span>
           <span className="hero__stat glass-subtle">{availableGenres.length} genres</span>
-          <span className="hero__stat glass-subtle">Curated for serious readers</span>
+          <span className="hero__stat glass-subtle">{completedCount} read</span>
         </div>
       </header>
 
@@ -125,7 +158,11 @@ function App() {
             <div className="catalog" role="list">
               {filteredBooks.map((book) => (
                 <div key={book.slug} className="catalog__item" role="listitem">
-                  <BookCard book={book} onClick={setSelectedBook} />
+                  <BookCard
+                    book={book}
+                    progress={readerProgress[book.slug]}
+                    onClick={setSelectedBook}
+                  />
                 </div>
               ))}
             </div>
@@ -133,7 +170,13 @@ function App() {
         )}
       </main>
 
-      <BookDrawer book={selectedBook} onClose={handleCloseDrawer} />
+      <BookDrawer
+        book={selectedBook}
+        progress={selectedBook ? readerProgress[selectedBook.slug] : null}
+        onClose={handleCloseDrawer}
+        onReadChange={handleReadChange}
+        onNotesChange={handleNotesChange}
+      />
     </div>
   )
 }

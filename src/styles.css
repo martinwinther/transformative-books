@@ -426,6 +426,32 @@ body {
   font-weight: 700;
 }
 
+.book-card__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.book-card__status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--chip-bg);
+  color: var(--muted);
+  padding: 0.14rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.book-card__status-pill--read {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rating-1), #1c8f64);
+}
+
 .book-card__header {
   margin-right: 2rem;
 }
@@ -493,6 +519,21 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
+}
+
+.book-card__notes-preview {
+  margin: 0;
+  padding: 0.72rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface), transparent 8%);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .book-card__cta {
@@ -668,12 +709,65 @@ body {
   margin-bottom: 0;
 }
 
+.drawer__section--tracker {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface), transparent 8%);
+}
+
 .drawer__section-title {
   margin: 0 0 0.35rem;
   font-size: 0.74rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.drawer__read-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.drawer__read-toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--rating-1);
+}
+
+.drawer__notes-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.drawer__notes {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  color: var(--text);
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+  line-height: 1.55;
+}
+
+.drawer__notes:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus), transparent 58%);
+  outline-offset: 1px;
+}
+
+.drawer__notes-help {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .drawer__justification,
