@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { buildGoodreadsSearchUrl } from '../utils/externalLinks'
 
 function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
   const overlayRef = useRef(null)
@@ -32,6 +33,7 @@ function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
 
   const notes = progress?.notes ?? ''
   const isRead = progress?.isRead === true
+  const goodreadsLink = buildGoodreadsSearchUrl(book.title, book.author)
 
   return (
     <div
@@ -69,6 +71,22 @@ function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
           >
             Difficulty: {book.rating}/5
           </span>
+          {book.title && (
+            <a
+              className="drawer__goodreads"
+              href={goodreadsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Search Goodreads for ${book.title} by ${book.author}`}
+            >
+              <span className="drawer__goodreads-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path d="M6.6 6.4c0-1.9 1.6-3.4 3.5-3.4 1.6 0 2.8.9 3.3 2.1.6-1.2 1.8-2.1 3.4-2.1 1.9 0 3.5 1.5 3.5 3.4v11.2c0 .7-.6 1.4-1.4 1.4h-2.2c-.8 0-1.4-.7-1.4-1.4V9.7c0-.6-.5-1.1-1.1-1.1s-1.1.5-1.1 1.1v7.9c0 .7-.6 1.4-1.4 1.4h-2.1c-.8 0-1.4-.7-1.4-1.4V9.7c0-.6-.5-1.1-1.1-1.1s-1.1.5-1.1 1.1v7.9c0 .7-.6 1.4-1.4 1.4H8c-.8 0-1.4-.7-1.4-1.4V6.4z" />
+                </svg>
+              </span>
+              <span className="drawer__goodreads-text">Goodreads</span>
+            </a>
+          )}
           {book.amazonLink && (
             <a
               className="drawer__amazon"
