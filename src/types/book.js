@@ -46,5 +46,6 @@ export const RATING_SCALE = [
 /**
  * @typedef {Object} BookProgress
  * @property {boolean} isRead
+ * @property {boolean} owns
  * @property {string} notes
  */

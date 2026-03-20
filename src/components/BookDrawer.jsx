@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { buildGoodreadsSearchUrl } from '../utils/externalLinks'
 
-function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
+function BookDrawer({ book, progress, onClose, onReadChange, onOwnChange, onNotesChange }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -33,6 +33,7 @@ function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
 
   const notes = progress?.notes ?? ''
   const isRead = progress?.isRead === true
+  const owns = progress?.owns === true
   const goodreadsLink = buildGoodreadsSearchUrl(book.title, book.author)
 
   return (
@@ -123,6 +124,14 @@ function BookDrawer({ book, progress, onClose, onReadChange, onNotesChange }) {
                 onChange={(e) => onReadChange(book.slug, e.target.checked)}
               />
               <span>I&apos;ve read this book</span>
+            </label>
+            <label className="drawer__own-toggle">
+              <input
+                type="checkbox"
+                checked={owns}
+                onChange={(e) => onOwnChange(book.slug, e.target.checked)}
+              />
+              <span>I own this book</span>
             </label>
             <label className="drawer__notes-label" htmlFor={`notes-${book.slug}`}>
               Personal notes

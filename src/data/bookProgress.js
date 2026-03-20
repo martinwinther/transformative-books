@@ -9,11 +9,13 @@ function normalizeEntry(entry) {
 
   const notes = typeof entry.notes === 'string' ? entry.notes : ''
   const isRead = entry.isRead === true
+  const owns = entry.owns === true
 
-  if (!isRead && !notes.trim()) return null
+  if (!isRead && !owns && !notes.trim()) return null
 
   return {
     isRead,
+    owns,
     notes,
   }
 }

@@ -76,14 +76,14 @@ function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
   const updateBookProgress = (slug, patch) => {
     setReaderProgress((prev) => {
-      const current = prev[slug] ?? { isRead: false, notes: '' }
+      const current = prev[slug] ?? { isRead: false, owns: false, notes: '' }
       const nextEntry = {
         ...current,
         ...patch,
       }
       const next = { ...prev }
 
-      if (!nextEntry.isRead && !nextEntry.notes.trim()) {
+      if (!nextEntry.isRead && !nextEntry.owns && !nextEntry.notes.trim()) {
         delete next[slug]
         return next
       }
@@ -95,6 +95,10 @@ function App() {
 
   const handleReadChange = (slug, isRead) => {
     updateBookProgress(slug, { isRead })
+  }
+
+  const handleOwnChange = (slug, owns) => {
+    updateBookProgress(slug, { owns })
   }
 
   const handleNotesChange = (slug, notes) => {
@@ -175,6 +179,7 @@ function App() {
         progress={selectedBook ? readerProgress[selectedBook.slug] : null}
         onClose={handleCloseDrawer}
         onReadChange={handleReadChange}
+        onOwnChange={handleOwnChange}
         onNotesChange={handleNotesChange}
       />
     </div>

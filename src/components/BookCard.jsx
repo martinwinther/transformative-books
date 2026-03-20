@@ -7,6 +7,7 @@ function BookCard({ book, progress, onClick }) {
   }
 
   const hasNotes = Boolean(progress?.notes?.trim())
+  const owns = progress?.owns === true
 
   return (
     <article
@@ -18,9 +19,10 @@ function BookCard({ book, progress, onClick }) {
       aria-label={`Open details for ${book.title} by ${book.author}`}
     >
       <p className="book-card__kicker">Transformative read</p>
-      {(progress?.isRead || hasNotes) && (
+      {(progress?.isRead || owns || hasNotes) && (
         <div className="book-card__status" aria-label="Your reading progress">
           {progress?.isRead && <span className="book-card__status-pill book-card__status-pill--read">Read</span>}
+          {owns && <span className="book-card__status-pill book-card__status-pill--owns">Owns</span>}
           {hasNotes && <span className="book-card__status-pill">Notes</span>}
         </div>
       )}
