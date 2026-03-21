@@ -5,6 +5,10 @@ function FiltersBar({
   onRatingFilterChange,
   genreFilter,
   onGenreFilterChange,
+  readFilter,
+  onReadFilterChange,
+  ownedFilter,
+  onOwnedFilterChange,
   availableGenres,
   sortBy,
   onSortByChange,
@@ -46,6 +50,34 @@ function FiltersBar({
               {genre}
             </option>
           ))}
+        </select>
+        <label htmlFor="read-filter" className="filters__label">
+          Reading status
+        </label>
+        <select
+          id="read-filter"
+          className="filters__sort filters__genre"
+          value={readFilter}
+          onChange={(e) => onReadFilterChange(e.target.value)}
+          aria-label="Filter by reading status"
+        >
+          <option value="all">All reading statuses</option>
+          <option value="read">Read</option>
+          <option value="unread">Unread</option>
+        </select>
+        <label htmlFor="owned-filter" className="filters__label">
+          Ownership
+        </label>
+        <select
+          id="owned-filter"
+          className="filters__sort filters__genre"
+          value={ownedFilter}
+          onChange={(e) => onOwnedFilterChange(e.target.value)}
+          aria-label="Filter by ownership status"
+        >
+          <option value="all">All ownership statuses</option>
+          <option value="owned">Owned</option>
+          <option value="unowned">Unowned</option>
         </select>
       </div>
       <div className="filters__row">

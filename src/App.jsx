@@ -15,6 +15,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [ratingFilter, setRatingFilter] = useState(null)
   const [genreFilter, setGenreFilter] = useState('')
+  const [readFilter, setReadFilter] = useState('all')
+  const [ownedFilter, setOwnedFilter] = useState('all')
   const [sortBy, setSortBy] = useState('rating-asc')
   const [readerProgress, setReaderProgress] = useState(() => loadBookProgress())
   const [theme, setTheme] = useState(() => {
@@ -47,7 +49,18 @@ function App() {
         ratingFilter == null || book.rating === ratingFilter
       const matchGenre =
         !genreFilter || book.genres.includes(genreFilter)
-      return matchSearch && matchRating && matchGenre
+      const progress = readerProgress[book.slug]
+      const isRead = progress?.isRead === true
+      const isOwned = progress?.owns === true
+      const matchRead =
+        readFilter === 'all' ||
+        (readFilter === 'read' && isRead) ||
+        (readFilter === 'unread' && !isRead)
+      const matchOwned =
+        ownedFilter === 'all' ||
+        (ownedFilter === 'owned' && isOwned) ||
+        (ownedFilter === 'unowned' && !isOwned)
+      return matchSearch && matchRating && matchGenre && matchRead && matchOwned
     })
 
     if (sortBy === 'rating-asc') {
@@ -56,7 +69,7 @@ function App() {
       next = [...next].sort((a, b) => a.title.localeCompare(b.title))
     }
     setFilteredBooks(next)
-  }, [books, searchQuery, ratingFilter, genreFilter, sortBy])
+  }, [books, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, readerProgress])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -141,6 +154,10 @@ function App() {
             onRatingFilterChange={setRatingFilter}
             genreFilter={genreFilter}
             onGenreFilterChange={setGenreFilter}
+            readFilter={readFilter}
+            onReadFilterChange={setReadFilter}
+            ownedFilter={ownedFilter}
+            onOwnedFilterChange={setOwnedFilter}
             availableGenres={availableGenres}
             sortBy={sortBy}
             onSortByChange={setSortBy}
