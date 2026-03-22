@@ -458,6 +458,12 @@ body {
   background: linear-gradient(135deg, var(--rating-4), #8a2f12);
 }
 
+.book-card__status-pill--user-rating {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #c9a227, #8a6a0e);
+}
+
 .book-card__header {
   margin-right: 2rem;
 }
@@ -805,6 +811,51 @@ body {
   width: 1rem;
   height: 1rem;
   accent-color: var(--rating-4);
+}
+
+.drawer__user-rating-wrap {
+  margin-bottom: 1rem;
+}
+
+.drawer__user-rating-label {
+  margin: 0 0 0.45rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.drawer__user-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.drawer__star {
+  margin: 0;
+  padding: 0.12rem 0.18rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: color-mix(in srgb, var(--muted), transparent 35%);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.drawer__star:hover {
+  color: color-mix(in srgb, #c9a227, var(--muted) 25%);
+  transform: scale(1.06);
+}
+
+.drawer__star:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus), transparent 56%);
+  outline-offset: 1px;
+}
+
+.drawer__star--on {
+  color: #c9a227;
+  text-shadow: 0 0 0.35rem color-mix(in srgb, #c9a227, transparent 55%);
 }
 
 .drawer__notes-label {

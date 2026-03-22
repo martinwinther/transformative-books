@@ -89,14 +89,19 @@ function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
   const updateBookProgress = (slug, patch) => {
     setReaderProgress((prev) => {
-      const current = prev[slug] ?? { isRead: false, owns: false, notes: '' }
+      const current = prev[slug] ?? { isRead: false, owns: false, notes: '', userRating: null }
       const nextEntry = {
         ...current,
         ...patch,
       }
       const next = { ...prev }
 
-      if (!nextEntry.isRead && !nextEntry.owns && !nextEntry.notes.trim()) {
+      if (
+        !nextEntry.isRead &&
+        !nextEntry.owns &&
+        !nextEntry.notes.trim() &&
+        nextEntry.userRating == null
+      ) {
         delete next[slug]
         return next
       }
@@ -116,6 +121,10 @@ function App() {
 
   const handleNotesChange = (slug, notes) => {
     updateBookProgress(slug, { notes })
+  }
+
+  const handleUserRatingChange = (slug, userRating) => {
+    updateBookProgress(slug, { userRating })
   }
 
   return (
@@ -197,6 +206,7 @@ function App() {
         onClose={handleCloseDrawer}
         onReadChange={handleReadChange}
         onOwnChange={handleOwnChange}
+        onUserRatingChange={handleUserRatingChange}
         onNotesChange={handleNotesChange}
       />
     </div>

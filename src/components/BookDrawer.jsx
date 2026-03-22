@@ -1,7 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { buildGoodreadsSearchUrl } from '../utils/externalLinks'
 
-function BookDrawer({ book, progress, onClose, onReadChange, onOwnChange, onNotesChange }) {
+function BookDrawer({
+  book,
+  progress,
+  onClose,
+  onReadChange,
+  onOwnChange,
+  onUserRatingChange,
+  onNotesChange,
+}) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -34,6 +42,14 @@ function BookDrawer({ book, progress, onClose, onReadChange, onOwnChange, onNote
   const notes = progress?.notes ?? ''
   const isRead = progress?.isRead === true
   const owns = progress?.owns === true
+  const rawUserRating = progress?.userRating
+  const userRating =
+    typeof rawUserRating === 'number' &&
+    Number.isInteger(rawUserRating) &&
+    rawUserRating >= 1 &&
+    rawUserRating <= 5
+      ? rawUserRating
+      : null
   const goodreadsLink = buildGoodreadsSearchUrl(book.title, book.author)
 
   return (
@@ -133,6 +149,38 @@ function BookDrawer({ book, progress, onClose, onReadChange, onOwnChange, onNote
               />
               <span>I own this book</span>
             </label>
+            <div className="drawer__user-rating-wrap">
+              <p className="drawer__user-rating-label" id={`user-rating-label-${book.slug}`}>
+                Your rating
+              </p>
+              <div
+                className="drawer__user-rating"
+                role="group"
+                aria-labelledby={`user-rating-label-${book.slug}`}
+              >
+                {[1, 2, 3, 4, 5].map((starValue) => {
+                  const isActive = userRating != null && starValue <= userRating
+                  return (
+                    <button
+                      key={starValue}
+                      type="button"
+                      className={`drawer__star ${isActive ? 'drawer__star--on' : ''}`}
+                      onClick={() =>
+                        onUserRatingChange(book.slug, userRating === starValue ? null : starValue)
+                      }
+                      aria-label={
+                        userRating === starValue
+                          ? `Clear ${starValue} star rating`
+                          : `Rate this book ${starValue} out of 5 stars`
+                      }
+                      aria-pressed={isActive}
+                    >
+                      ★
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
             <label className="drawer__notes-label" htmlFor={`notes-${book.slug}`}>
               Personal notes
             </label>

@@ -4,19 +4,33 @@ function canUseStorage() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
 }
 
+/**
+ * @param {unknown} raw
+ * @returns {number | null}
+ */
+function normalizeUserRating(raw) {
+  if (raw == null) return null
+  const n = typeof raw === 'number' ? raw : parseInt(String(raw), 10)
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return null
+  if (n < 1 || n > 5) return null
+  return n
+}
+
 function normalizeEntry(entry) {
   if (!entry || typeof entry !== 'object') return null
 
   const notes = typeof entry.notes === 'string' ? entry.notes : ''
   const isRead = entry.isRead === true
   const owns = entry.owns === true
+  const userRating = normalizeUserRating(entry.userRating)
 
-  if (!isRead && !owns && !notes.trim()) return null
+  if (!isRead && !owns && !notes.trim() && userRating == null) return null
 
   return {
     isRead,
     owns,
     notes,
+    userRating,
   }
 }
 
