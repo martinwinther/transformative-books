@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { buildGoodreadsSearchUrl } from '../utils/externalLinks'
 
 function BookDrawer({
@@ -50,7 +50,13 @@ function BookDrawer({
     rawUserRating <= 5
       ? rawUserRating
       : null
+  const [hoverRating, setHoverRating] = useState(null)
+  const effectiveRating = hoverRating ?? userRating
   const goodreadsLink = buildGoodreadsSearchUrl(book.title, book.author)
+
+  useEffect(() => {
+    setHoverRating(null)
+  }, [book.slug])
 
   return (
     <div
@@ -157,23 +163,29 @@ function BookDrawer({
                 className="drawer__user-rating"
                 role="group"
                 aria-labelledby={`user-rating-label-${book.slug}`}
+                onMouseLeave={() => setHoverRating(null)}
               >
                 {[1, 2, 3, 4, 5].map((starValue) => {
-                  const isActive = userRating != null && starValue <= userRating
+                  const isActive =
+                    effectiveRating != null && starValue <= effectiveRating
                   return (
                     <button
                       key={starValue}
                       type="button"
                       className={`drawer__star ${isActive ? 'drawer__star--on' : ''}`}
-                      onClick={() =>
-                        onUserRatingChange(book.slug, userRating === starValue ? null : starValue)
-                      }
+                      onClick={() => {
+                        const nextRating = userRating === starValue ? null : starValue
+                        onUserRatingChange(book.slug, nextRating)
+                        setHoverRating(nextRating)
+                      }}
+                      onMouseEnter={() => setHoverRating(starValue)}
+                      onFocus={() => setHoverRating(starValue)}
                       aria-label={
                         userRating === starValue
                           ? `Clear ${starValue} star rating`
                           : `Rate this book ${starValue} out of 5 stars`
                       }
-                      aria-pressed={isActive}
+                      aria-pressed={userRating === starValue}
                     >
                       ★
                     </button>
