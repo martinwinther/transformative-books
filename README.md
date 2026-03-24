@@ -20,8 +20,8 @@ Cross-device reader progress sync is implemented with Firebase Auth + Firestore 
 ## Firebase status
 
 - Firebase account used: `martin.winther@gmail.com`
-- Firebase project: `transformative-books-app`
-- Firebase web app id: `1:903048096742:web:b26536e8c0f4e3d66dc427`
+- Firebase project: `transformative-books-secure`
+- Firebase web app id: `1:285245651421:web:d8cf6c9ac85dfb73619e34`
 - Firestore default database location: `eur3`
 - Firestore rules/indexes deployed from this repo
 
@@ -35,8 +35,8 @@ In Firebase Console > Authentication > Sign-in method:
 If you need to re-provision Firestore from CLI:
 
 ```bash
-firebase firestore:databases:create --project transformative-books-app --location eur3 "(default)"
-firebase deploy --only firestore:rules,firestore:indexes --project transformative-books-app
+firebase firestore:databases:create --project transformative-books-secure --location eur3 "(default)"
+firebase deploy --only firestore:rules,firestore:indexes --project transformative-books-secure
 ```
 
 If authentication providers are not enabled, sign-in calls will fail with `auth/operation-not-allowed`.
