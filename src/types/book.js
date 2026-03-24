@@ -49,4 +49,6 @@ export const RATING_SCALE = [
  * @property {boolean} owns
  * @property {number | null} userRating
  * @property {string} notes
+ * @property {number | null} updatedAt
+ * @property {string} updatedByDevice
  */

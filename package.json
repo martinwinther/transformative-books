@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "emulators": "firebase emulators:start --only auth,firestore",
+    "test:firestore-rules": "firebase emulators:exec --only firestore \"node --test scripts/firestore.rules.test.mjs\""
   },
   "dependencies": {
+    "firebase": "^12.11.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^6.0.3"
   }

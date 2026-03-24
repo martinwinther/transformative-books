@@ -9,9 +9,11 @@ function BookDrawer({
   onOwnChange,
   onUserRatingChange,
   onNotesChange,
+  notesHelpText,
 }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
+  const [hoverRating, setHoverRating] = useState(null)
 
   useEffect(() => {
     if (!book) return
@@ -37,6 +39,10 @@ function BookDrawer({
     if (e.target === overlayRef.current) onClose()
   }
 
+  useEffect(() => {
+    setHoverRating(null)
+  }, [book?.slug])
+
   if (!book) return null
 
   const notes = progress?.notes ?? ''
@@ -50,13 +56,8 @@ function BookDrawer({
     rawUserRating <= 5
       ? rawUserRating
       : null
-  const [hoverRating, setHoverRating] = useState(null)
   const effectiveRating = hoverRating ?? userRating
   const goodreadsLink = buildGoodreadsSearchUrl(book.title, book.author)
-
-  useEffect(() => {
-    setHoverRating(null)
-  }, [book.slug])
 
   return (
     <div
@@ -204,7 +205,7 @@ function BookDrawer({
               placeholder="Capture your reflections, favorite passages, or what changed for you."
               rows={7}
             />
-            <p className="drawer__notes-help">Saved locally in this browser for now.</p>
+            <p className="drawer__notes-help">{notesHelpText || 'Saved locally in this browser for now.'}</p>
           </section>
           <section className="drawer__section">
             <h3 className="drawer__section-title">Summary</h3>
