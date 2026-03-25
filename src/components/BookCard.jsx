@@ -1,8 +1,33 @@
-function BookCard({ book, progress, onClick }) {
+import { useEffect, useState } from 'react'
+
+function BookCard({ book, progress, onClick, onShare }) {
+  const [shareState, setShareState] = useState('idle')
+
+  useEffect(() => {
+    if (shareState === 'idle') return
+    const timeoutId = window.setTimeout(() => {
+      setShareState('idle')
+    }, 2200)
+    return () => window.clearTimeout(timeoutId)
+  }, [shareState])
+
   const handleKeyDown = (e) => {
+    if (e.target !== e.currentTarget) return
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onClick(book)
+    }
+  }
+
+  const handleShareClick = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!onShare) return
+    try {
+      const copied = await onShare(book)
+      setShareState(copied ? 'copied' : 'error')
+    } catch {
+      setShareState('error')
     }
   }
 
@@ -68,7 +93,17 @@ function BookCard({ book, progress, onClick }) {
           {progress.notes}
         </p>
       )}
-      <span className="book-card__cta" aria-hidden="true">Read rationale →</span>
+      <div className="book-card__footer">
+        <span className="book-card__cta" aria-hidden="true">Read rationale →</span>
+        <button
+          type="button"
+          className={`book-card__share${shareState !== 'idle' ? ` book-card__share--${shareState}` : ''}`}
+          onClick={handleShareClick}
+          aria-label={`Share ${book.title}`}
+        >
+          {shareState === 'copied' ? 'Copied' : shareState === 'error' ? 'Retry' : 'Share'}
+        </button>
+      </div>
     </article>
   )
 }

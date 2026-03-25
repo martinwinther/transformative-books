@@ -36,6 +36,8 @@ import MigrationDialog from './components/MigrationDialog.jsx'
 import RatingScaleInfo from './components/RatingScaleInfo.jsx'
 import SyncPanel from './components/SyncPanel.jsx'
 
+const SHARE_SNIPPET_LIMIT = 180
+
 function toReadableError(error) {
   if (!error || typeof error !== 'object') return 'Something went wrong. Please try again.'
   const code = typeof error.code === 'string' ? error.code : ''
@@ -57,6 +59,45 @@ function toReadableError(error) {
         ? error.message
         : 'Something went wrong. Please try again.'
   }
+}
+
+function parseSharedBookSlug(hashValue) {
+  const hash = typeof hashValue === 'string' ? hashValue.replace(/^#/, '') : ''
+  if (!hash) return ''
+  const params = new URLSearchParams(hash)
+  const slug = params.get('book')
+  return typeof slug === 'string' ? slug.trim() : ''
+}
+
+function toShareSnippet(text) {
+  const normalized = typeof text === 'string' ? text.trim().replace(/\s+/g, ' ') : ''
+  if (!normalized) return ''
+  if (normalized.length <= SHARE_SNIPPET_LIMIT) return normalized
+  return `${normalized.slice(0, SHARE_SNIPPET_LIMIT - 1).trim()}…`
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) return false
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch {
+    // Fall through to legacy copy fallback.
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+  textarea.setSelectionRange(0, textarea.value.length)
+  const didCopy = document.execCommand('copy')
+  document.body.removeChild(textarea)
+  return didCopy
 }
 
 function App() {
@@ -117,6 +158,25 @@ function App() {
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    if (books.length === 0) return
+
+    const syncSelectedBookFromHash = () => {
+      const sharedSlug = parseSharedBookSlug(window.location.hash)
+      if (!sharedSlug) {
+        setSelectedBook(null)
+        return
+      }
+
+      const matched = books.find((book) => book.slug === sharedSlug)
+      setSelectedBook(matched ?? null)
+    }
+
+    syncSelectedBookFromHash()
+    window.addEventListener('hashchange', syncSelectedBookFromHash)
+    return () => window.removeEventListener('hashchange', syncSelectedBookFromHash)
+  }, [books])
 
   useEffect(() => {
     let next = books.filter((book) => {
@@ -354,11 +414,45 @@ function App() {
     })
   }
 
+  const setBookHash = (slug) => {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    if (slug) {
+      params.set('book', slug)
+    } else {
+      params.delete('book')
+    }
+    const hash = params.toString()
+    const nextUrl = `${window.location.pathname}${window.location.search}${hash ? `#${hash}` : ''}`
+    window.history.replaceState(null, '', nextUrl)
+  }
+
+  const handleSelectBook = (book) => {
+    setSelectedBook(book)
+    setBookHash(book.slug)
+  }
+
+  const handleShareBook = async (book) => {
+    const url = new URL(window.location.href)
+    const params = new URLSearchParams(url.hash.replace(/^#/, ''))
+    params.set('book', book.slug)
+    url.hash = params.toString()
+
+    const snippet = toShareSnippet(book.justification)
+    const shareText = snippet
+      ? `${book.title} by ${book.author}\n${snippet}\n\n${url.toString()}`
+      : `${book.title} by ${book.author}\n\n${url.toString()}`
+
+    return copyTextToClipboard(shareText)
+  }
+
   const availableGenres = Array.from(
     new Set(books.flatMap((book) => book.genres))
   ).sort((a, b) => a.localeCompare(b))
   const completedCount = books.filter((book) => readerProgress[book.slug]?.isRead).length
-  const handleCloseDrawer = () => setSelectedBook(null)
+  const handleCloseDrawer = () => {
+    setSelectedBook(null)
+    setBookHash('')
+  }
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
 
   const notesHelpText = !firebaseEnabled
@@ -478,7 +572,8 @@ function App() {
                   <BookCard
                     book={book}
                     progress={readerProgress[book.slug]}
-                    onClick={setSelectedBook}
+                    onClick={handleSelectBook}
+                    onShare={handleShareBook}
                   />
                 </div>
               ))}

@@ -609,10 +609,53 @@ body {
   overflow: hidden;
 }
 
-.book-card__cta {
+.book-card__footer {
   margin-top: 0.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.book-card__cta {
   font-size: 0.84rem;
   font-weight: 650;
+}
+
+.book-card__share {
+  border: 1px solid var(--surface-border);
+  background: var(--chip-bg);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.24rem 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.book-card__share:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--focus), var(--surface-border) 70%);
+}
+
+.book-card__share:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus), transparent 58%);
+  outline-offset: 1px;
+}
+
+.book-card__share--copied {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #2e9f74, #247f5d);
+}
+
+.book-card__share--error {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #9f3a2e, #7a2b22);
 }
 
 .drawer-overlay {
