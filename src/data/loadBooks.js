@@ -123,7 +123,7 @@ const TRANSFORMATIVE_PLACEHOLDER = 'Coming later'
  * @returns {Promise<import('../types/book.js').Book[]>}
  */
 export async function loadBooks() {
-  const url = '/transformative-canon-with-transformative-experience.csv'
+  const url = '/western-canon.csv'
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`Failed to load books: ${response.status}`)

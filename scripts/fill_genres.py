@@ -10,7 +10,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-CSV_PATH = Path("public/transformative-canon-with-transformative-experience.csv")
+CSV_PATH = Path("public/western-canon.csv")
 MATCH_CACHE_PATH = Path("/tmp/ol_book_matches.json")
 MAX_GENRES = 3
 
