@@ -10,7 +10,11 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-CSV_PATH = Path("public/western-canon.csv")
+CSV_BY_CANON = {
+    "western": Path("public/western-canon.csv"),
+    "eastern": Path("public/eastern-canon.csv"),
+}
+DEFAULT_CANON = "western"
 MATCH_CACHE_PATH = Path("/tmp/ol_book_matches.json")
 MAX_GENRES = 3
 
@@ -517,11 +521,11 @@ def should_add_literary_fiction(genres, summary):
     return "Literary Fiction" not in genres
 
 
-def update_csv(rows, genres_by_key):
+def update_csv(rows, genres_by_key, csv_path):
     fieldnames = list(rows[0].keys())
     if "Genres" not in fieldnames:
         fieldnames.append("Genres")
-    with CSV_PATH.open("w", newline="", encoding="utf-8") as handle:
+    with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
@@ -534,9 +538,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--write", action="store_true", help="Write genres back to the CSV.")
     parser.add_argument("--limit", type=int, default=0, help="Only process the first N rows.")
+    parser.add_argument(
+        "--canon",
+        choices=sorted(CSV_BY_CANON.keys()),
+        default=DEFAULT_CANON,
+        help="Canon CSV to analyze when --csv is not provided.",
+    )
+    parser.add_argument("--csv", type=Path, help="Explicit CSV path to analyze.")
     args = parser.parse_args()
 
-    rows = load_rows(CSV_PATH)
+    csv_path = args.csv if args.csv else CSV_BY_CANON[args.canon]
+
+    rows = load_rows(csv_path)
     matches = load_match_cache()
 
     genres_by_key = {}
@@ -573,8 +586,8 @@ def main():
         if len(genres_by_key) != len(rows):
             print("Refusing to write a partial run.", file=sys.stderr)
             sys.exit(1)
-        update_csv(rows, genres_by_key)
-        print(f"updated_csv={CSV_PATH}")
+        update_csv(rows, genres_by_key, csv_path)
+        print(f"updated_csv={csv_path}")
 
 
 if __name__ == "__main__":

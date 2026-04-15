@@ -9,6 +9,8 @@
  * @property {string} transformativeExperience
  * @property {string} amazonLink
  * @property {string} slug
+ * @property {'western' | 'eastern'} [canon]
+ * @property {Array<'western' | 'eastern'>} [canonSources]
  */
 
 export const RATING_SCALE = [

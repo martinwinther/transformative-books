@@ -1,4 +1,7 @@
 function FiltersBar({
+  canonFilter,
+  canonOptions,
+  onCanonFilterChange,
   searchQuery,
   onSearchChange,
   ratingFilter,
@@ -16,6 +19,26 @@ function FiltersBar({
 }) {
   return (
     <div className="filters">
+      <div className="filters__row filters__row--sort">
+        <label htmlFor="canon-filter" className="filters__label">
+          Canon
+        </label>
+        <select
+          id="canon-filter"
+          className="filters__sort filters__genre"
+          value={canonFilter}
+          onChange={(e) => onCanonFilterChange(e.target.value)}
+          aria-label="Select canonical source"
+        >
+          {canonOptions.map((canonOption) => (
+            <option key={canonOption} value={canonOption}>
+              {canonOption === 'all'
+                ? 'All canons'
+                : canonOption.charAt(0).toUpperCase() + canonOption.slice(1)}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="filters__row">
         <label htmlFor="search-books" className="filters__label">
           Search

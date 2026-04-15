@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { loadBooks } from './data/loadBooks.js'
+import {
+  CANON_OPTIONS,
+  loadBooks,
+  normalizeCanon,
+  resolveCanonicalSelectionForSlug,
+} from './data/loadBooks.js'
 import {
   applyProgressPatch,
   areProgressMapsEqual,
@@ -37,6 +42,7 @@ import RatingScaleInfo from './components/RatingScaleInfo.jsx'
 import SyncPanel from './components/SyncPanel.jsx'
 
 const SHARE_SNIPPET_LIMIT = 180
+const CANON_QUERY_KEY = 'canon'
 
 function toReadableError(error) {
   if (!error || typeof error !== 'object') return 'Something went wrong. Please try again.'
@@ -67,6 +73,12 @@ function parseSharedBookSlug(hashValue) {
   const params = new URLSearchParams(hash)
   const slug = params.get('book')
   return typeof slug === 'string' ? slug.trim() : ''
+}
+
+function parseCanonFromSearch(searchValue) {
+  const search = typeof searchValue === 'string' ? searchValue : ''
+  const params = new URLSearchParams(search)
+  return normalizeCanon(params.get(CANON_QUERY_KEY))
 }
 
 function toShareSnippet(text) {
@@ -102,6 +114,7 @@ async function copyTextToClipboard(text) {
 
 function App() {
   const initialProgress = loadBookProgress()
+  const [canonFilter, setCanonFilter] = useState(() => parseCanonFromSearch(window.location.search))
   const [books, setBooks] = useState([])
   const [filteredBooks, setFilteredBooks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -147,36 +160,96 @@ function App() {
   }
 
   useEffect(() => {
-    loadBooks()
+    let isActive = true
+    setLoading(true)
+    setError(null)
+
+    loadBooks(canonFilter)
       .then((data) => {
+        if (!isActive) return
         setBooks(data)
         setFilteredBooks(data)
         setLoading(false)
       })
       .catch((err) => {
+        if (!isActive) return
+        setBooks([])
         setError(err.message)
         setLoading(false)
       })
+
+    return () => {
+      isActive = false
+    }
+  }, [canonFilter])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get(CANON_QUERY_KEY) === canonFilter) return
+    params.set(CANON_QUERY_KEY, canonFilter)
+    const nextSearch = params.toString()
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
+    window.history.replaceState(null, '', nextUrl)
+  }, [canonFilter])
+
+  useEffect(() => {
+    const syncCanonFromUrl = () => {
+      const nextCanon = parseCanonFromSearch(window.location.search)
+      setCanonFilter((previousCanon) => (previousCanon === nextCanon ? previousCanon : nextCanon))
+    }
+
+    window.addEventListener('popstate', syncCanonFromUrl)
+    return () => window.removeEventListener('popstate', syncCanonFromUrl)
   }, [])
 
   useEffect(() => {
-    if (books.length === 0) return
+    let isActive = true
 
-    const syncSelectedBookFromHash = () => {
+    const syncSelectedBookFromHash = async () => {
       const sharedSlug = parseSharedBookSlug(window.location.hash)
       if (!sharedSlug) {
-        setSelectedBook(null)
+        if (isActive) setSelectedBook(null)
         return
       }
 
       const matched = books.find((book) => book.slug === sharedSlug)
-      setSelectedBook(matched ?? null)
+      if (matched) {
+        if (isActive) setSelectedBook(matched)
+        return
+      }
+
+      if (canonFilter !== 'all') {
+        const canonicalSelection = await resolveCanonicalSelectionForSlug(sharedSlug)
+        if (!isActive) return
+
+        if (
+          canonicalSelection &&
+          canonicalSelection !== 'all' &&
+          canonicalSelection !== canonFilter
+        ) {
+          setCanonFilter(canonicalSelection)
+          return
+        }
+      }
+
+      if (isActive) setSelectedBook(null)
     }
 
     syncSelectedBookFromHash()
     window.addEventListener('hashchange', syncSelectedBookFromHash)
-    return () => window.removeEventListener('hashchange', syncSelectedBookFromHash)
-  }, [books])
+    return () => {
+      isActive = false
+      window.removeEventListener('hashchange', syncSelectedBookFromHash)
+    }
+  }, [books, canonFilter])
+
+  useEffect(() => {
+    if (!genreFilter) return
+    const genreStillAvailable = books.some((book) => book.genres.includes(genreFilter))
+    if (!genreStillAvailable) {
+      setGenreFilter('')
+    }
+  }, [books, genreFilter])
 
   useEffect(() => {
     let next = books.filter((book) => {
@@ -433,6 +506,7 @@ function App() {
 
   const handleShareBook = async (book) => {
     const url = new URL(window.location.href)
+    url.searchParams.set(CANON_QUERY_KEY, canonFilter)
     const params = new URLSearchParams(url.hash.replace(/^#/, ''))
     params.set('book', book.slug)
     url.hash = params.toString()
@@ -538,6 +612,9 @@ function App() {
         <section className="controls glass">
           <RatingScaleInfo />
           <FiltersBar
+            canonFilter={canonFilter}
+            canonOptions={CANON_OPTIONS}
+            onCanonFilterChange={setCanonFilter}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             ratingFilter={ratingFilter}

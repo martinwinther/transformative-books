@@ -61,6 +61,33 @@ function normalizeUrl(raw) {
 }
 
 const MAX_GENRES_PER_BOOK = 3
+const CANON_URLS = {
+  western: '/western-canon.csv',
+  eastern: '/eastern-canon.csv',
+}
+
+export const CANON_OPTIONS = ['western', 'eastern', 'all']
+export const DEFAULT_CANON = 'western'
+
+const booksCache = new Map()
+
+function normalizeCanonicalText(text) {
+  return String(text ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+}
+
+function buildCanonicalBookKey(author, title) {
+  return `${normalizeCanonicalText(author)}::${normalizeCanonicalText(title)}`
+}
+
+export function normalizeCanon(rawCanon) {
+  if (rawCanon === 'western' || rawCanon === 'eastern' || rawCanon === 'all') {
+    return rawCanon
+  }
+  return DEFAULT_CANON
+}
 
 /**
  * Parse and normalize genres from a single CSV cell.
@@ -111,24 +138,16 @@ function parseGenres(cells, genresIdx, genre1Idx, genre2Idx, genre3Idx) {
   return parseGenresFromCell(parts.join('|'))
 }
 
-/**
- * Fetch and parse the books CSV into Book objects.
- * @returns {Promise<import('../types/book.js').Book[]>}
- */
 const TRANSFORMATIVE_PLACEHOLDER = 'Coming later'
 
 /**
  * Fetch and parse the books CSV into Book objects.
  * Uses the CSV that includes TransformativeExperience when present.
+ * @param {'western' | 'eastern'} canon
+ * @param {string} text
  * @returns {Promise<import('../types/book.js').Book[]>}
  */
-export async function loadBooks() {
-  const url = '/western-canon.csv'
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`Failed to load books: ${response.status}`)
-  }
-  const text = await response.text()
+function parseBooksFromCsv(canon, text) {
   const lines = text.split(/\r?\n/).filter((line) => line.trim())
 
   const books = []
@@ -193,8 +212,84 @@ export async function loadBooks() {
       transformativeExperience,
       amazonLink,
       slug: buildSlug(author, title),
+      canon,
+      canonSources: [canon],
     })
   }
 
   return books
+}
+
+async function loadSingleCanonBooks(canon) {
+  const url = CANON_URLS[canon]
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to load books: ${response.status}`)
+  }
+  const text = await response.text()
+  return parseBooksFromCsv(canon, text)
+}
+
+function mergeCanons(westernBooks, easternBooks) {
+  const merged = []
+  const seenByAuthorTitle = new Map()
+
+  const addBook = (book) => {
+    const key = buildCanonicalBookKey(book.author, book.title)
+    const existing = seenByAuthorTitle.get(key)
+    if (!existing) {
+      seenByAuthorTitle.set(key, book)
+      merged.push(book)
+      return
+    }
+    if (!existing.canonSources.includes(book.canon)) {
+      existing.canonSources = [...existing.canonSources, book.canon]
+    }
+  }
+
+  // Western precedence for exact author+title duplicates.
+  westernBooks.forEach(addBook)
+  easternBooks.forEach(addBook)
+
+  return merged
+}
+
+/**
+ * Fetch and parse the books CSV into Book objects.
+ * @param {'western' | 'eastern' | 'all'} requestedCanon
+ * @returns {Promise<import('../types/book.js').Book[]>}
+ */
+export async function loadBooks(requestedCanon = DEFAULT_CANON) {
+  const canon = normalizeCanon(requestedCanon)
+  const cached = booksCache.get(canon)
+  if (cached) return cached
+
+  const pending =
+    canon === 'all'
+      ? Promise.all([loadBooks('western'), loadBooks('eastern')]).then(([westernBooks, easternBooks]) =>
+          mergeCanons(westernBooks, easternBooks)
+        )
+      : loadSingleCanonBooks(canon)
+
+  booksCache.set(canon, pending)
+  return pending
+}
+
+/**
+ * Resolve the most specific canon that contains a slug.
+ * @param {string} slug
+ * @returns {Promise<'western' | 'eastern' | 'all' | null>}
+ */
+export async function resolveCanonicalSelectionForSlug(slug) {
+  const value = String(slug ?? '').trim()
+  if (!value) return null
+
+  const [westernBooks, easternBooks] = await Promise.all([loadBooks('western'), loadBooks('eastern')])
+  const inWestern = westernBooks.some((book) => book.slug === value)
+  const inEastern = easternBooks.some((book) => book.slug === value)
+
+  if (inWestern && inEastern) return 'all'
+  if (inWestern) return 'western'
+  if (inEastern) return 'eastern'
+  return null
 }
