@@ -42,11 +42,10 @@ function AuthModal({
           Continue as a guest anytime. Account sync keeps your progress aligned across devices.
         </p>
 
-        <div className="auth-modal__tabs" role="tablist" aria-label="Authentication modes">
+        <div className="auth-modal__tabs" aria-label="Authentication modes">
           <button
             type="button"
-            role="tab"
-            aria-selected={mode === 'signin'}
+            aria-pressed={mode === 'signin'}
             className={`auth-modal__tab ${mode === 'signin' ? 'auth-modal__tab--active' : ''}`}
             onClick={() => setMode('signin')}
           >
@@ -54,8 +53,7 @@ function AuthModal({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={mode === 'signup'}
+            aria-pressed={mode === 'signup'}
             className={`auth-modal__tab ${mode === 'signup' ? 'auth-modal__tab--active' : ''}`}
             onClick={() => setMode('signup')}
           >

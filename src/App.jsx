@@ -38,8 +38,6 @@ import BookCard from './components/BookCard.jsx'
 import BookDrawer from './components/BookDrawer.jsx'
 import FiltersBar from './components/FiltersBar.jsx'
 import MigrationDialog from './components/MigrationDialog.jsx'
-import RatingScaleInfo from './components/RatingScaleInfo.jsx'
-import SyncPanel from './components/SyncPanel.jsx'
 
 const SHARE_SNIPPET_LIMIT = 180
 const CANON_QUERY_KEY = 'canon'
@@ -126,6 +124,7 @@ function App() {
   const [readFilter, setReadFilter] = useState('all')
   const [ownedFilter, setOwnedFilter] = useState('all')
   const [sortBy, setSortBy] = useState('rating-asc')
+  const [filtersOpen, setFiltersOpen] = useState(true)
   const [readerProgress, setReaderProgress] = useState(initialProgress)
   const [theme, setTheme] = useState(() => {
     const storedTheme = window.localStorage.getItem('tb-theme')
@@ -522,7 +521,6 @@ function App() {
   const availableGenres = Array.from(
     new Set(books.flatMap((book) => book.genres))
   ).sort((a, b) => a.localeCompare(b))
-  const completedCount = books.filter((book) => readerProgress[book.slug]?.isRead).length
   const handleCloseDrawer = () => {
     setSelectedBook(null)
     setBookHash('')
@@ -550,86 +548,59 @@ function App() {
             className="theme-toggle"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
-            {theme === 'light' ? 'Dark mode' : 'Light mode'}
+            <span className="theme-toggle__icon" aria-hidden="true">
+              {theme === 'light' ? '◐' : '◑'}
+            </span>
           </button>
         </div>
         <h1>Discover Books That Change How You Think</h1>
         <p className="tagline">
-          A reader-first library of timeless works chosen for depth, transformation, and lasting impact.
+          Curated books for serious readers.
         </p>
-        <SyncPanel
-          firebaseEnabled={firebaseEnabled}
-          firebaseMissingKeys={firebaseMissingKeys}
-          authLoading={authLoading}
-          authSession={authSession}
-          syncState={syncState}
-          syncError={syncError}
-          onOpenAuth={() => setAuthModalOpen(true)}
-          onSignOut={() => signOutCurrentUser().catch((err) => setSyncError(toReadableError(err)))}
-          onResendVerification={() => sendVerificationEmail().catch((err) => setSyncError(toReadableError(err)))}
-          onRefreshVerification={async () => {
-            try {
-              const user = await refreshAuthUser()
-              setAuthSession(toAuthSession(user))
-              setSyncState(user?.emailVerified ? 'syncing' : 'unverified')
-            } catch (err) {
-              setSyncError(toReadableError(err))
-            }
-          }}
-          onReloadCloud={async () => {
-            if (!authSession?.uid) return
-            try {
-              const cloudProgress = await fetchUserProgressOnce(authSession.uid)
-              commitReaderProgress(cloudProgress)
-              setSyncState('synced')
-              setSyncError('')
-            } catch (err) {
-              setSyncError(toReadableError(err))
-              setSyncState('error')
-            }
-          }}
-          onReimportLocal={async () => {
-            if (!authSession?.uid) return
-            try {
-              await replaceUserProgress(authSession.uid, readerProgressRef.current, deviceIdRef.current)
-              setSyncState('synced')
-              setSyncError('')
-            } catch (err) {
-              setSyncError(toReadableError(err))
-              setSyncState('error')
-            }
-          }}
-        />
-        <div className="hero__stats" aria-label="Catalog overview">
-          <span className="hero__stat glass-subtle">{books.length} titles</span>
-          <span className="hero__stat glass-subtle">{availableGenres.length} genres</span>
-          <span className="hero__stat glass-subtle">{completedCount} read</span>
-        </div>
       </header>
 
       <main className="main">
         <section className="controls glass">
-          <RatingScaleInfo />
-          <FiltersBar
-            canonFilter={canonFilter}
-            canonOptions={CANON_OPTIONS}
-            onCanonFilterChange={setCanonFilter}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            ratingFilter={ratingFilter}
-            onRatingFilterChange={setRatingFilter}
-            genreFilter={genreFilter}
-            onGenreFilterChange={setGenreFilter}
-            readFilter={readFilter}
-            onReadFilterChange={setReadFilter}
-            ownedFilter={ownedFilter}
-            onOwnedFilterChange={setOwnedFilter}
-            availableGenres={availableGenres}
-            sortBy={sortBy}
-            onSortByChange={setSortBy}
-            resultCount={filteredBooks.length}
-          />
+          <div className="controls__header">
+            <h2 className="controls__title">Filters</h2>
+            <button
+              type="button"
+              className="controls__toggle"
+              aria-expanded={filtersOpen}
+              aria-controls="filters-panel"
+              aria-label={filtersOpen ? 'Hide filters' : 'Show filters'}
+              title={filtersOpen ? 'Hide filters' : 'Show filters'}
+              onClick={() => setFiltersOpen((prev) => !prev)}
+            >
+              <span className="controls__toggle-icon" aria-hidden="true">
+                {filtersOpen ? '▾' : '▸'}
+              </span>
+            </button>
+          </div>
+          {filtersOpen && (
+            <div id="filters-panel">
+              <FiltersBar
+                canonFilter={canonFilter}
+                canonOptions={CANON_OPTIONS}
+                onCanonFilterChange={setCanonFilter}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                ratingFilter={ratingFilter}
+                onRatingFilterChange={setRatingFilter}
+                genreFilter={genreFilter}
+                onGenreFilterChange={setGenreFilter}
+                readFilter={readFilter}
+                onReadFilterChange={setReadFilter}
+                ownedFilter={ownedFilter}
+                onOwnedFilterChange={setOwnedFilter}
+                availableGenres={availableGenres}
+                sortBy={sortBy}
+                onSortByChange={setSortBy}
+              />
+            </div>
+          )}
         </section>
 
         {loading && <p className="status">Loading catalog…</p>}
