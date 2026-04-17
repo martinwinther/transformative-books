@@ -540,9 +540,9 @@ function App() {
   return (
     <div className="app">
       <div className="ambient-layer" aria-hidden="true" />
-      <header className="hero glass">
-        <div className="hero__top-row">
-          <p className="hero__eyebrow">Transformative Canon</p>
+      <header className="hero">
+        <div className="hero__content">
+          <h1 className="hero__title">Transformative Canon</h1>
           <button
             type="button"
             className="theme-toggle"
@@ -555,30 +555,24 @@ function App() {
             </span>
           </button>
         </div>
-        <h1>Discover Books That Change How You Think</h1>
-        <p className="tagline">
-          Curated books for serious readers.
-        </p>
       </header>
 
       <main className="main">
         <section className="controls glass">
-          <div className="controls__header">
-            <h2 className="controls__title">Filters</h2>
-            <button
-              type="button"
-              className="controls__toggle"
-              aria-expanded={filtersOpen}
-              aria-controls="filters-panel"
-              aria-label={filtersOpen ? 'Hide filters' : 'Show filters'}
-              title={filtersOpen ? 'Hide filters' : 'Show filters'}
-              onClick={() => setFiltersOpen((prev) => !prev)}
-            >
-              <span className="controls__toggle-icon" aria-hidden="true">
-                {filtersOpen ? '▾' : '▸'}
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="controls__header"
+            aria-expanded={filtersOpen}
+            aria-controls="filters-panel"
+            aria-label={filtersOpen ? 'Hide filters' : 'Show filters'}
+            title={filtersOpen ? 'Hide filters' : 'Show filters'}
+            onClick={() => setFiltersOpen((prev) => !prev)}
+          >
+            <span className="controls__title">Filters</span>
+            <span className="controls__toggle-icon" aria-hidden="true">
+              {filtersOpen ? '▾' : '▸'}
+            </span>
+          </button>
           {filtersOpen && (
             <div id="filters-panel">
               <FiltersBar
