@@ -49,7 +49,7 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font-sans);
   color: var(--text);
   background:
@@ -60,14 +60,14 @@ body {
 
 .app {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 1.2rem 1.2rem 2rem;
 }
 
 .ambient-layer {
   position: fixed;
-  inset: -20vh -15vw auto;
-  height: 70vh;
+  inset: -20dvh -15vw auto;
+  height: 70dvh;
   z-index: -1;
   pointer-events: none;
   filter: blur(48px);
