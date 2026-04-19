@@ -41,6 +41,39 @@ import MigrationDialog from './components/MigrationDialog.jsx'
 
 const SHARE_SNIPPET_LIMIT = 180
 const CANON_QUERY_KEY = 'canon'
+const THEME_STORAGE_KEY = 'tb-theme'
+
+function readStoredTheme() {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null
+  try {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+    return storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : null
+  } catch {
+    return null
+  }
+}
+
+function resolveSystemTheme() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light'
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
+function resolveInitialTheme() {
+  return readStoredTheme() ?? resolveSystemTheme()
+}
+
+function persistTheme(theme) {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+  } catch {
+    // Ignore persistence failures to keep rendering resilient on restricted browsers.
+  }
+}
 
 function toReadableError(error) {
   if (!error || typeof error !== 'object') return 'Something went wrong. Please try again.'
@@ -126,11 +159,7 @@ function App() {
   const [sortBy, setSortBy] = useState('rating-asc')
   const [filtersOpen, setFiltersOpen] = useState(true)
   const [readerProgress, setReaderProgress] = useState(initialProgress)
-  const [theme, setTheme] = useState(() => {
-    const storedTheme = window.localStorage.getItem('tb-theme')
-    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  })
+  const [theme, setTheme] = useState(() => resolveInitialTheme())
 
   const readerProgressRef = useRef(initialProgress)
   const deviceIdRef = useRef(getDeviceId())
@@ -283,7 +312,7 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    window.localStorage.setItem('tb-theme', theme)
+    persistTheme(theme)
   }, [theme])
 
   useEffect(() => {

@@ -466,6 +466,20 @@ body {
 }
 
 @media (max-width: 760px) {
+  .ambient-layer {
+    position: absolute;
+    inset: -12dvh -8vw auto;
+    height: 52dvh;
+    filter: blur(28px);
+    opacity: 0.62;
+  }
+
+  .glass,
+  .glass-subtle {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   .filters__grid {
     grid-template-columns: 1fr;
     gap: 0.48rem;
