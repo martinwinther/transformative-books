@@ -57,3 +57,50 @@ Note: Firestore emulator requires Java installed locally.
 - Site: `transformative-books-app`
 - URL: <https://transformative-books-app.netlify.app>
 - GitHub CI/CD is configured for branches + pull requests via `netlify init`.
+
+## Public Books API
+
+The site publishes a static, machine-readable books API at:
+
+- <https://transformative-books-app.netlify.app/api/v1/books>
+
+This endpoint returns an envelope object:
+
+```json
+{
+   "version": "v1",
+   "generatedAt": "2026-04-19T12:34:56.000Z",
+   "count": 123,
+   "data": [
+      {
+         "author": "...",
+         "title": "...",
+         "rating": 5,
+         "genres": ["..."],
+         "justification": "...",
+         "expandedJustification": "...",
+         "transformativeExperience": "...",
+         "amazonLink": "https://...",
+         "slug": "...",
+         "canon": "western",
+         "canonSources": ["western", "eastern"]
+      }
+   ]
+}
+```
+
+### Regenerating endpoint data
+
+The payload is generated at build time from:
+
+- `public/western-canon.csv`
+- `public/eastern-canon.csv`
+
+Commands:
+
+```bash
+npm run generate:books-api
+npm run build
+```
+
+`npm run build` automatically runs `npm run generate:books-api` before Vite builds `dist`.

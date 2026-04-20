@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "generate:books-api": "node scripts/generateBooksJson.mjs",
+    "build": "npm run generate:books-api && vite build",
     "preview": "vite preview",
     "emulators": "firebase emulators:start --only auth,firestore",
     "test:firestore-rules": "firebase emulators:exec --only firestore \"node --test scripts/firestore.rules.test.mjs\""

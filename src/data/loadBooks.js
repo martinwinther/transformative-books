@@ -147,7 +147,7 @@ const TRANSFORMATIVE_PLACEHOLDER = 'Coming later'
  * @param {string} text
  * @returns {Promise<import('../types/book.js').Book[]>}
  */
-function parseBooksFromCsv(canon, text) {
+export function parseBooksFromCsv(canon, text) {
   const lines = text.split(/\r?\n/).filter((line) => line.trim())
 
   const books = []
@@ -230,7 +230,7 @@ async function loadSingleCanonBooks(canon) {
   return parseBooksFromCsv(canon, text)
 }
 
-function mergeCanons(westernBooks, easternBooks) {
+export function mergeCanons(westernBooks, easternBooks) {
   const merged = []
   const seenByAuthorTitle = new Map()
 
