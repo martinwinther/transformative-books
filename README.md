@@ -104,3 +104,56 @@ npm run build
 ```
 
 `npm run build` automatically runs `npm run generate:books-api` before Vite builds `dist`.
+
+## Secure User Progress API
+
+The site also exposes an authenticated endpoint for the currently logged-in user:
+
+- `GET /api/v1/me/progress`
+
+This endpoint requires a Firebase ID token in the `Authorization` header:
+
+```http
+Authorization: Bearer <firebase_id_token>
+```
+
+The server verifies the token using Firebase Admin SDK, derives the user id from the verified token, and only returns `users/{uid}/bookProgress` for that uid.
+
+Response shape:
+
+```json
+{
+   "uid": "firebase_uid",
+   "count": 2,
+   "data": {
+      "book-slug": {
+         "isRead": true,
+         "owns": false,
+         "userRating": 4,
+         "notes": "...",
+         "updatedAt": 1762730695000,
+         "updatedByDevice": "device-id"
+      }
+   }
+}
+```
+
+### Server environment variables (Netlify)
+
+Set one of these credential options in Netlify site environment variables.
+
+Option A (recommended):
+
+- `FIREBASE_SERVICE_ACCOUNT_JSON`: full Firebase service account JSON as a single string.
+
+Option B:
+
+- `FIREBASE_SERVICE_ACCOUNT_BASE64`: base64-encoded service account JSON.
+
+Option C:
+
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY` (preserve line breaks or use `\\n` sequences)
+
+Keep these as server-only variables. Do not prefix them with `VITE_`.
