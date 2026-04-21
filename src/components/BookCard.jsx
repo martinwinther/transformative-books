@@ -61,7 +61,8 @@ function BookCard({ book, progress, onClick, onShare }) {
               className="book-card__status-pill book-card__status-pill--user-rating"
               aria-label={`Your rating ${userRating} out of 5`}
             >
-              {userRating}★
+              <span className="book-card__status-rating-value">{userRating}</span>
+              <span className="book-card__status-rating-star" aria-hidden="true">★</span>
             </span>
           )}
           {hasNotes && <span className="book-card__status-pill">Notes</span>}
