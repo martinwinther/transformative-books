@@ -547,15 +547,31 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow: hidden;
   border-radius: 20px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface-strong), #ffffff 16%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent;
   box-shadow: var(--shadow);
   padding: 1rem;
   cursor: pointer;
   transition: transform 210ms ease, box-shadow 210ms ease, border-color 210ms ease;
+}
+
+.book-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--surface-strong), #ffffff 16%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+.book-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .book-card:hover {
@@ -576,6 +592,8 @@ body {
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .book-card__status {
@@ -601,24 +619,26 @@ body {
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .book-card__status-pill--read {
   color: var(--text-on-rating);
   border-color: transparent;
-  background: linear-gradient(135deg, var(--rating-1), #1c8f64);
+  background: var(--rating-1);
 }
 
 .book-card__status-pill--owns {
   color: var(--text-on-rating);
   border-color: transparent;
-  background: linear-gradient(135deg, var(--rating-4), #8a2f12);
+  background: var(--rating-4);
 }
 
 .book-card__status-pill--user-rating {
   color: var(--text-on-rating);
   border-color: transparent;
-  background: linear-gradient(135deg, #c9a227, #8a6a0e);
+  background: var(--rating-3);
 }
 
 .book-card__status-rating-value {
@@ -680,6 +700,8 @@ body {
   justify-content: center;
   font-weight: 700;
   font-size: 0.81rem;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .book-card__rating[data-rating="1"] { background: var(--rating-1); }
