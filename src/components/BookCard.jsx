@@ -55,7 +55,7 @@ function BookCard({ book, progress, onClick, onShare }) {
       {(progress?.isRead || owns || hasNotes || userRating != null) && (
         <div className="book-card__status" aria-label="Your reading progress">
           {progress?.isRead && <span className="book-card__status-pill book-card__status-pill--read">Read</span>}
-          {owns && <span className="book-card__status-pill book-card__status-pill--owns">Owns</span>}
+          {owns && <span className="book-card__status-pill book-card__status-pill--owns">Owned</span>}
           {userRating != null && (
             <span
               className="book-card__status-pill book-card__status-pill--user-rating"
