@@ -41,7 +41,89 @@ import MigrationDialog from './components/MigrationDialog.jsx'
 
 const SHARE_SNIPPET_LIMIT = 180
 const CANON_QUERY_KEY = 'canon'
+const SEARCH_QUERY_KEY = 'search'
+const RATING_QUERY_KEY = 'rating'
+const GENRE_QUERY_KEY = 'genre'
+const READ_QUERY_KEY = 'read'
+const OWNED_QUERY_KEY = 'owned'
+const SORT_QUERY_KEY = 'sort'
 const THEME_STORAGE_KEY = 'tb-theme'
+
+const READ_FILTER_OPTIONS = new Set(['all', 'read', 'unread'])
+const OWNED_FILTER_OPTIONS = new Set(['all', 'owned', 'unowned'])
+const SORT_OPTIONS = new Set(['rating-asc', 'title'])
+
+function normalizeRatingFilter(value) {
+  const parsed = Number.parseInt(value, 10)
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 5 ? parsed : null
+}
+
+function normalizeReadFilter(value) {
+  return READ_FILTER_OPTIONS.has(value) ? value : 'all'
+}
+
+function normalizeOwnedFilter(value) {
+  return OWNED_FILTER_OPTIONS.has(value) ? value : 'all'
+}
+
+function normalizeSortBy(value) {
+  return SORT_OPTIONS.has(value) ? value : 'rating-asc'
+}
+
+function parseFiltersFromSearch(searchValue) {
+  const search = typeof searchValue === 'string' ? searchValue : ''
+  const params = new URLSearchParams(search)
+  const searchQuery = params.get(SEARCH_QUERY_KEY)
+  const genreFilter = params.get(GENRE_QUERY_KEY)
+
+  return {
+    canonFilter: normalizeCanon(params.get(CANON_QUERY_KEY)),
+    searchQuery: typeof searchQuery === 'string' ? searchQuery : '',
+    ratingFilter: normalizeRatingFilter(params.get(RATING_QUERY_KEY)),
+    genreFilter: typeof genreFilter === 'string' ? genreFilter : '',
+    readFilter: normalizeReadFilter(params.get(READ_QUERY_KEY)),
+    ownedFilter: normalizeOwnedFilter(params.get(OWNED_QUERY_KEY)),
+    sortBy: normalizeSortBy(params.get(SORT_QUERY_KEY)),
+  }
+}
+
+function buildSearchParamsFromFilters(filters) {
+  const params = new URLSearchParams()
+
+  params.set(CANON_QUERY_KEY, normalizeCanon(filters.canonFilter))
+
+  const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : ''
+  if (searchQuery) {
+    params.set(SEARCH_QUERY_KEY, searchQuery)
+  }
+
+  const ratingFilter = normalizeRatingFilter(filters.ratingFilter)
+  if (ratingFilter != null) {
+    params.set(RATING_QUERY_KEY, String(ratingFilter))
+  }
+
+  const genreFilter = typeof filters.genreFilter === 'string' ? filters.genreFilter : ''
+  if (genreFilter) {
+    params.set(GENRE_QUERY_KEY, genreFilter)
+  }
+
+  const readFilter = normalizeReadFilter(filters.readFilter)
+  if (readFilter !== 'all') {
+    params.set(READ_QUERY_KEY, readFilter)
+  }
+
+  const ownedFilter = normalizeOwnedFilter(filters.ownedFilter)
+  if (ownedFilter !== 'all') {
+    params.set(OWNED_QUERY_KEY, ownedFilter)
+  }
+
+  const sortBy = normalizeSortBy(filters.sortBy)
+  if (sortBy !== 'rating-asc') {
+    params.set(SORT_QUERY_KEY, sortBy)
+  }
+
+  return params
+}
 
 function readStoredTheme() {
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null
@@ -106,12 +188,6 @@ function parseSharedBookSlug(hashValue) {
   return typeof slug === 'string' ? slug.trim() : ''
 }
 
-function parseCanonFromSearch(searchValue) {
-  const search = typeof searchValue === 'string' ? searchValue : ''
-  const params = new URLSearchParams(search)
-  return normalizeCanon(params.get(CANON_QUERY_KEY))
-}
-
 function toShareSnippet(text) {
   const normalized = typeof text === 'string' ? text.trim().replace(/\s+/g, ' ') : ''
   if (!normalized) return ''
@@ -145,18 +221,19 @@ async function copyTextToClipboard(text) {
 
 function App() {
   const initialProgress = loadBookProgress()
-  const [canonFilter, setCanonFilter] = useState(() => parseCanonFromSearch(window.location.search))
+  const [initialFilters] = useState(() => parseFiltersFromSearch(window.location.search))
+  const [canonFilter, setCanonFilter] = useState(initialFilters.canonFilter)
   const [books, setBooks] = useState([])
   const [filteredBooks, setFilteredBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedBook, setSelectedBook] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [ratingFilter, setRatingFilter] = useState(null)
-  const [genreFilter, setGenreFilter] = useState('')
-  const [readFilter, setReadFilter] = useState('all')
-  const [ownedFilter, setOwnedFilter] = useState('all')
-  const [sortBy, setSortBy] = useState('rating-asc')
+  const [searchQuery, setSearchQuery] = useState(initialFilters.searchQuery)
+  const [ratingFilter, setRatingFilter] = useState(initialFilters.ratingFilter)
+  const [genreFilter, setGenreFilter] = useState(initialFilters.genreFilter)
+  const [readFilter, setReadFilter] = useState(initialFilters.readFilter)
+  const [ownedFilter, setOwnedFilter] = useState(initialFilters.ownedFilter)
+  const [sortBy, setSortBy] = useState(initialFilters.sortBy)
   const [filtersOpen, setFiltersOpen] = useState(true)
   const [readerProgress, setReaderProgress] = useState(initialProgress)
   const [theme, setTheme] = useState(() => resolveInitialTheme())
@@ -212,22 +289,48 @@ function App() {
   }, [canonFilter])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get(CANON_QUERY_KEY) === canonFilter) return
-    params.set(CANON_QUERY_KEY, canonFilter)
-    const nextSearch = params.toString()
+    const nextParams = buildSearchParamsFromFilters({
+      canonFilter,
+      searchQuery,
+      ratingFilter,
+      genreFilter,
+      readFilter,
+      ownedFilter,
+      sortBy,
+    })
+    const nextSearch = nextParams.toString()
+    const currentSearch = window.location.search.replace(/^\?/, '')
+    if (currentSearch === nextSearch) return
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
     window.history.replaceState(null, '', nextUrl)
-  }, [canonFilter])
+  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy])
 
   useEffect(() => {
-    const syncCanonFromUrl = () => {
-      const nextCanon = parseCanonFromSearch(window.location.search)
-      setCanonFilter((previousCanon) => (previousCanon === nextCanon ? previousCanon : nextCanon))
+    const syncFiltersFromUrl = () => {
+      const nextFilters = parseFiltersFromSearch(window.location.search)
+      setCanonFilter((previous) =>
+        previous === nextFilters.canonFilter ? previous : nextFilters.canonFilter
+      )
+      setSearchQuery((previous) =>
+        previous === nextFilters.searchQuery ? previous : nextFilters.searchQuery
+      )
+      setRatingFilter((previous) =>
+        previous === nextFilters.ratingFilter ? previous : nextFilters.ratingFilter
+      )
+      setGenreFilter((previous) =>
+        previous === nextFilters.genreFilter ? previous : nextFilters.genreFilter
+      )
+      setReadFilter((previous) =>
+        previous === nextFilters.readFilter ? previous : nextFilters.readFilter
+      )
+      setOwnedFilter((previous) =>
+        previous === nextFilters.ownedFilter ? previous : nextFilters.ownedFilter
+      )
+      setSortBy((previous) => (previous === nextFilters.sortBy ? previous : nextFilters.sortBy))
     }
 
-    window.addEventListener('popstate', syncCanonFromUrl)
-    return () => window.removeEventListener('popstate', syncCanonFromUrl)
+    window.addEventListener('popstate', syncFiltersFromUrl)
+    return () => window.removeEventListener('popstate', syncFiltersFromUrl)
   }, [])
 
   useEffect(() => {
@@ -534,7 +637,17 @@ function App() {
 
   const handleShareBook = async (book) => {
     const url = new URL(window.location.href)
-    url.searchParams.set(CANON_QUERY_KEY, canonFilter)
+    const searchParams = buildSearchParamsFromFilters({
+      canonFilter,
+      searchQuery,
+      ratingFilter,
+      genreFilter,
+      readFilter,
+      ownedFilter,
+      sortBy,
+    })
+    const nextSearch = searchParams.toString()
+    url.search = nextSearch ? `?${nextSearch}` : ''
     const params = new URLSearchParams(url.hash.replace(/^#/, ''))
     params.set('book', book.slug)
     url.hash = params.toString()
