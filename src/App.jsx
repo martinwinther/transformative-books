@@ -38,6 +38,11 @@ import BookCard from './components/BookCard.jsx'
 import BookDrawer from './components/BookDrawer.jsx'
 import FiltersBar from './components/FiltersBar.jsx'
 import MigrationDialog from './components/MigrationDialog.jsx'
+import {
+  buildBooksCsv,
+  buildBooksCsvFileName,
+  downloadCsvFile,
+} from './utils/exportBooksCsv.js'
 
 const SHARE_SNIPPET_LIMIT = 180
 const CANON_QUERY_KEY = 'canon'
@@ -660,6 +665,12 @@ function App() {
     return copyTextToClipboard(shareText)
   }
 
+  const handleExportVisibleBooksCsv = () => {
+    const csvText = buildBooksCsv(filteredBooks, readerProgress)
+    const fileName = buildBooksCsvFileName({ canonFilter })
+    downloadCsvFile(fileName, csvText)
+  }
+
   const availableGenres = Array.from(
     new Set(books.flatMap((book) => book.genres))
   ).sort((a, b) => a.localeCompare(b))
@@ -747,8 +758,19 @@ function App() {
         {!loading && !error && filteredBooks.length > 0 && (
           <section className="catalog-shell">
             <div className="catalog-shell__header">
-              <h2 className="catalog-shell__title">Browse the library</h2>
+              <div className="catalog-shell__title-row">
+                <h2 className="catalog-shell__title">Browse the library</h2>
+                <button
+                  type="button"
+                  className="catalog-shell__export"
+                  onClick={handleExportVisibleBooksCsv}
+                  aria-label={`Export ${filteredBooks.length} visible books as CSV`}
+                >
+                  Export CSV
+                </button>
+              </div>
               <p className="catalog-shell__subtitle">Select any title to read why it belongs in the canon.</p>
+              <p className="filters__count">Showing {filteredBooks.length} books</p>
             </div>
             <div className="catalog" role="list">
               {filteredBooks.map((book) => (
