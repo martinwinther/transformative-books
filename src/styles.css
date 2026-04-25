@@ -64,6 +64,38 @@ body {
   padding: 1.2rem 1.2rem 2rem;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .ambient-layer {
+    display: none;
+  }
+
+  .glass,
+  .glass-subtle,
+  .book-card::before,
+  .drawer {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .catalog-shell,
+  .catalog__item,
+  .drawer-overlay,
+  .modal-overlay,
+  .drawer {
+    animation: none !important;
+  }
+
+  .book-card,
+  .book-card__share,
+  .theme-toggle,
+  .catalog-shell__export,
+  .drawer__amazon,
+  .drawer__goodreads,
+  .drawer__star {
+    transition: none;
+  }
+}
+
 .ambient-layer {
   position: fixed;
   inset: -20dvh -15vw auto;
