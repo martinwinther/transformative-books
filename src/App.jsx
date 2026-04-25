@@ -14,7 +14,7 @@ import {
   mergeProgressByLatest,
   saveBookProgress,
 } from './data/bookProgress.js'
-import { firebaseEnabled, firebaseMissingKeys } from './firebase/client'
+import { firebaseEnabled, firebaseRuntimeDisabledReason } from './firebase/client'
 import {
   onAuthSessionChange,
   refreshAuthUser,
@@ -239,6 +239,7 @@ async function copyTextToClipboard(text) {
 }
 
 function App() {
+  const safeModeEnabled = typeof window !== 'undefined' && window.__TB_SAFE_MODE__ === true
   const initialProgress = loadBookProgress()
   const [initialFilters] = useState(() => parseFiltersFromSearch(window.location.search))
   const [canonFilter, setCanonFilter] = useState(initialFilters.canonFilter)
@@ -308,6 +309,7 @@ function App() {
   }, [canonFilter])
 
   useEffect(() => {
+    if (safeModeEnabled) return
     const nextParams = buildSearchParamsFromFilters({
       canonFilter,
       searchQuery,
@@ -322,7 +324,7 @@ function App() {
     if (currentSearch === nextSearch) return
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
     window.history.replaceState(null, '', nextUrl)
-  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy])
+  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, safeModeEnabled])
 
   useEffect(() => {
     const syncFiltersFromUrl = () => {
@@ -638,6 +640,7 @@ function App() {
   }
 
   const setBookHash = (slug) => {
+    if (safeModeEnabled) return
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     if (slug) {
       params.set('book', slug)
@@ -695,7 +698,9 @@ function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
 
   const notesHelpText = !firebaseEnabled
-    ? 'Saved locally in this browser.'
+    ? firebaseRuntimeDisabledReason
+      ? 'Saved locally in this browser. Cloud sync is temporarily disabled for mobile stability.'
+      : 'Saved locally in this browser.'
     : !authSession
       ? 'Saved locally. Sign in to sync across devices.'
       : !authSession.emailVerified
@@ -725,6 +730,11 @@ function App() {
       </header>
 
       <main className="main">
+        {safeModeEnabled && (
+          <p className="status">
+            Stability mode is active for this tab after repeated reload attempts. Some sync and URL features are limited.
+          </p>
+        )}
         <section className="controls glass">
           <button
             type="button"

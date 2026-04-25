@@ -2,6 +2,27 @@ import { getApp, getApps, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
 
+function detectIosFirefox() {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  const isFirefoxOnIos = /FxiOS/i.test(ua)
+  if (!isFirefoxOnIos) return false
+  const isIosPlatform =
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  return isIosPlatform
+}
+
+function resolveFirebaseRuntimeDisableReason() {
+  if (typeof window !== 'undefined' && window.__TB_DISABLE_FIREBASE__ === true) {
+    return 'safe-mode-reload-loop'
+  }
+  if (detectIosFirefox()) {
+    return 'ios-firefox-stability'
+  }
+  return ''
+}
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,7 +34,8 @@ const firebaseConfig = {
 
 const requiredFirebaseKeys = ['apiKey', 'authDomain', 'projectId', 'appId']
 export const firebaseMissingKeys = requiredFirebaseKeys.filter((key) => !firebaseConfig[key])
-export const firebaseEnabled = firebaseMissingKeys.length === 0
+export const firebaseRuntimeDisabledReason = resolveFirebaseRuntimeDisableReason()
+export const firebaseEnabled = firebaseMissingKeys.length === 0 && !firebaseRuntimeDisabledReason
 
 const appInstance = firebaseEnabled ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null
 const authInstance = appInstance ? getAuth(appInstance) : null
