@@ -64,40 +64,6 @@ body {
   padding: 1.2rem 1.2rem 2rem;
 }
 
-:root[data-reduced-effects="true"] body {
-  background: linear-gradient(165deg, var(--bg), var(--bg-contrast));
-}
-
-:root[data-reduced-effects="true"] .ambient-layer {
-  display: none;
-}
-
-:root[data-reduced-effects="true"] .glass,
-:root[data-reduced-effects="true"] .glass-subtle,
-:root[data-reduced-effects="true"] .book-card::before,
-:root[data-reduced-effects="true"] .drawer {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-:root[data-reduced-effects="true"] .catalog-shell,
-:root[data-reduced-effects="true"] .catalog__item,
-:root[data-reduced-effects="true"] .drawer-overlay,
-:root[data-reduced-effects="true"] .modal-overlay,
-:root[data-reduced-effects="true"] .drawer {
-  animation: none !important;
-}
-
-:root[data-reduced-effects="true"] .book-card,
-:root[data-reduced-effects="true"] .book-card__share,
-:root[data-reduced-effects="true"] .theme-toggle,
-:root[data-reduced-effects="true"] .catalog-shell__export,
-:root[data-reduced-effects="true"] .drawer__amazon,
-:root[data-reduced-effects="true"] .drawer__goodreads,
-:root[data-reduced-effects="true"] .drawer__star {
-  transition: none;
-}
-
 .ambient-layer {
   position: fixed;
   inset: -20dvh -15vw auto;
