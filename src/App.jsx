@@ -240,7 +240,6 @@ async function copyTextToClipboard(text) {
 
 function App() {
   const safeModeEnabled = typeof window !== 'undefined' && window.__TB_SAFE_MODE__ === true
-  const stabilityModeEnabled = typeof window !== 'undefined' && window.__TB_STABILITY_MODE__ === true
   const initialProgress = loadBookProgress()
   const [initialFilters] = useState(() => parseFiltersFromSearch(window.location.search))
   const [canonFilter, setCanonFilter] = useState(initialFilters.canonFilter)
@@ -310,7 +309,6 @@ function App() {
   }, [canonFilter])
 
   useEffect(() => {
-    if (stabilityModeEnabled) return
     const nextParams = buildSearchParamsFromFilters({
       canonFilter,
       searchQuery,
@@ -325,7 +323,7 @@ function App() {
     if (currentSearch === nextSearch) return
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
     window.history.replaceState(null, '', nextUrl)
-  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, stabilityModeEnabled])
+  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy])
 
   useEffect(() => {
     const syncFiltersFromUrl = () => {
@@ -641,7 +639,6 @@ function App() {
   }
 
   const setBookHash = (slug) => {
-    if (stabilityModeEnabled) return
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     if (slug) {
       params.set('book', slug)
