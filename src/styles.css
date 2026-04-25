@@ -69,14 +69,6 @@ body {
     display: none;
   }
 
-  .glass,
-  .glass-subtle,
-  .book-card::before,
-  .drawer {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
   .catalog-shell,
   .catalog__item,
   .drawer-overlay,
