@@ -188,8 +188,6 @@ function toReadableError(error) {
       return 'An account already exists for this email.'
     case 'auth/popup-closed-by-user':
       return 'Google sign-in was canceled.'
-    case 'auth/unauthorized-domain':
-      return 'Google sign-in is blocked for this domain. Add this host under Firebase Authentication -> Settings -> Authorized domains.'
     case 'auth/too-many-requests':
       return 'Too many attempts. Please wait and try again.'
     case 'permission-denied':
