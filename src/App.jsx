@@ -14,7 +14,7 @@ import {
   mergeProgressByLatest,
   saveBookProgress,
 } from './data/bookProgress.js'
-import { firebaseEnabled, firebaseRuntimeDisabledReason } from './firebase/client'
+import { firebaseEnabled } from './firebase/client'
 import {
   onAuthSessionChange,
   refreshAuthUser,
@@ -699,9 +699,7 @@ function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
 
   const notesHelpText = !firebaseEnabled
-    ? firebaseRuntimeDisabledReason
-      ? 'Saved locally in this browser. Cloud sync is temporarily disabled for mobile stability.'
-      : 'Saved locally in this browser.'
+    ? 'Saved locally in this browser.'
     : !authSession
       ? 'Saved locally. Sign in to sync across devices.'
       : !authSession.emailVerified
@@ -731,13 +729,6 @@ function App() {
       </header>
 
       <main className="main">
-        {stabilityModeEnabled && (
-          <p className="status">
-            {safeModeEnabled
-              ? 'Stability mode is active for this tab after repeated reload attempts. Some sync and URL features are limited.'
-              : 'Mobile stability profile is active on iOS WebKit. Some sync and visual effects are limited to keep the app stable.'}
-          </p>
-        )}
         <section className="controls glass">
           <button
             type="button"
