@@ -65,6 +65,7 @@ const CANON_URLS = {
   western: '/western-canon.csv',
   eastern: '/eastern-canon.csv',
 }
+const BOOKS_API_URL = '/api/v1/books.json'
 
 export const CANON_OPTIONS = ['western', 'eastern', 'all']
 export const DEFAULT_CANON = 'western'
@@ -230,6 +231,75 @@ async function loadSingleCanonBooks(canon) {
   return parseBooksFromCsv(canon, text)
 }
 
+function normalizeApiBookRecord(raw) {
+  if (!raw || typeof raw !== 'object') return null
+
+  const author = String(raw.author ?? '').trim()
+  const title = String(raw.title ?? '').trim()
+  if (!author && !title) return null
+
+  const canon = raw.canon === 'eastern' ? 'eastern' : 'western'
+  const canonSourcesRaw = Array.isArray(raw.canonSources)
+    ? raw.canonSources.filter((value) => value === 'western' || value === 'eastern')
+    : []
+  const canonSources = Array.from(new Set([...canonSourcesRaw, canon]))
+
+  const ratingValue = Number.parseInt(String(raw.rating ?? '1'), 10)
+  const rating = Number.isInteger(ratingValue)
+    ? Math.min(5, Math.max(1, ratingValue))
+    : 1
+
+  const genres = Array.isArray(raw.genres)
+    ? parseGenresFromCell(raw.genres.join('|'))
+    : parseGenresFromCell(String(raw.genres ?? ''))
+
+  const justification = String(raw.justification ?? '').trim()
+  const expandedJustificationRaw = String(raw.expandedJustification ?? '').trim()
+  const transformativeRaw = String(raw.transformativeExperience ?? '').trim()
+
+  return {
+    author,
+    title,
+    rating,
+    genres,
+    justification,
+    expandedJustification: expandedJustificationRaw || justification,
+    transformativeExperience: transformativeRaw || TRANSFORMATIVE_PLACEHOLDER,
+    amazonLink: normalizeUrl(String(raw.amazonLink ?? '')),
+    slug: String(raw.slug ?? '').trim() || buildSlug(author, title),
+    canon,
+    canonSources,
+  }
+}
+
+async function loadBooksFromApi(requestedCanon) {
+  const canon = normalizeCanon(requestedCanon)
+  const response = await fetch(BOOKS_API_URL)
+  if (!response.ok) {
+    throw new Error(`Books API unavailable: ${response.status}`)
+  }
+
+  const payload = await response.json()
+  const records = Array.isArray(payload?.data) ? payload.data : []
+  const seen = new Set()
+  const books = []
+
+  for (const record of records) {
+    const normalized = normalizeApiBookRecord(record)
+    if (!normalized) continue
+    const inRequestedCanon =
+      canon === 'all' ||
+      normalized.canon === canon ||
+      normalized.canonSources.includes(canon)
+    if (!inRequestedCanon) continue
+    if (seen.has(normalized.slug)) continue
+    seen.add(normalized.slug)
+    books.push(normalized)
+  }
+
+  return books
+}
+
 export function mergeCanons(westernBooks, easternBooks) {
   const merged = []
   const seenByAuthorTitle = new Map()
@@ -264,12 +334,13 @@ export async function loadBooks(requestedCanon = DEFAULT_CANON) {
   const cached = booksCache.get(canon)
   if (cached) return cached
 
-  const pending =
+  const pending = loadBooksFromApi(canon).catch(() =>
     canon === 'all'
       ? Promise.all([loadBooks('western'), loadBooks('eastern')]).then(([westernBooks, easternBooks]) =>
           mergeCanons(westernBooks, easternBooks)
         )
       : loadSingleCanonBooks(canon)
+  )
 
   booksCache.set(canon, pending)
   return pending

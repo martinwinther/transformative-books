@@ -2,23 +2,27 @@ import { getApp, getApps, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
 
-function detectIosFirefox() {
+function detectIosWebKit() {
   if (typeof navigator === 'undefined') return false
   const ua = navigator.userAgent || ''
-  const isFirefoxOnIos = /FxiOS/i.test(ua)
-  if (!isFirefoxOnIos) return false
   const isIosPlatform =
     /iPhone|iPad|iPod/i.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  return isIosPlatform
+  return isIosPlatform && /AppleWebKit/i.test(ua)
 }
 
 function resolveFirebaseRuntimeDisableReason() {
+  if (typeof window !== 'undefined' && typeof window.__TB_DISABLE_FIREBASE_REASON__ === 'string') {
+    return window.__TB_DISABLE_FIREBASE_REASON__
+  }
   if (typeof window !== 'undefined' && window.__TB_DISABLE_FIREBASE__ === true) {
     return 'safe-mode-reload-loop'
   }
-  if (detectIosFirefox()) {
-    return 'ios-firefox-stability'
+  if (typeof window !== 'undefined' && window.__TB_IOS_WEBKIT__ === true) {
+    return 'ios-webkit-stability'
+  }
+  if (detectIosWebKit()) {
+    return 'ios-webkit-stability'
   }
   return ''
 }

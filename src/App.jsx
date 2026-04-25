@@ -188,6 +188,8 @@ function toReadableError(error) {
       return 'An account already exists for this email.'
     case 'auth/popup-closed-by-user':
       return 'Google sign-in was canceled.'
+    case 'auth/unauthorized-domain':
+      return 'Google sign-in is blocked for this domain. Add this host under Firebase Authentication -> Settings -> Authorized domains.'
     case 'auth/too-many-requests':
       return 'Too many attempts. Please wait and try again.'
     case 'permission-denied':
@@ -240,6 +242,7 @@ async function copyTextToClipboard(text) {
 
 function App() {
   const safeModeEnabled = typeof window !== 'undefined' && window.__TB_SAFE_MODE__ === true
+  const stabilityModeEnabled = typeof window !== 'undefined' && window.__TB_STABILITY_MODE__ === true
   const initialProgress = loadBookProgress()
   const [initialFilters] = useState(() => parseFiltersFromSearch(window.location.search))
   const [canonFilter, setCanonFilter] = useState(initialFilters.canonFilter)
@@ -309,7 +312,7 @@ function App() {
   }, [canonFilter])
 
   useEffect(() => {
-    if (safeModeEnabled) return
+    if (stabilityModeEnabled) return
     const nextParams = buildSearchParamsFromFilters({
       canonFilter,
       searchQuery,
@@ -324,7 +327,7 @@ function App() {
     if (currentSearch === nextSearch) return
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
     window.history.replaceState(null, '', nextUrl)
-  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, safeModeEnabled])
+  }, [canonFilter, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, stabilityModeEnabled])
 
   useEffect(() => {
     const syncFiltersFromUrl = () => {
@@ -640,7 +643,7 @@ function App() {
   }
 
   const setBookHash = (slug) => {
-    if (safeModeEnabled) return
+    if (stabilityModeEnabled) return
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     if (slug) {
       params.set('book', slug)
@@ -730,9 +733,11 @@ function App() {
       </header>
 
       <main className="main">
-        {safeModeEnabled && (
+        {stabilityModeEnabled && (
           <p className="status">
-            Stability mode is active for this tab after repeated reload attempts. Some sync and URL features are limited.
+            {safeModeEnabled
+              ? 'Stability mode is active for this tab after repeated reload attempts. Some sync and URL features are limited.'
+              : 'Mobile stability profile is active on iOS WebKit. Some sync and visual effects are limited to keep the app stable.'}
           </p>
         )}
         <section className="controls glass">

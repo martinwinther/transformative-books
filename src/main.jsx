@@ -5,6 +5,15 @@ const RELOAD_WINDOW_MS = 15000
 const RELOAD_THRESHOLD = 4
 const WINDOW_NAME_KEY = 'tbBootTimestamps'
 
+function detectIosWebKit() {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(ua)
+  const isTouchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+  if (!isAppleMobile && !isTouchMac) return false
+  return /AppleWebKit/i.test(ua)
+}
+
 function readWindowNameState() {
   if (typeof window === 'undefined') return {}
   try {
@@ -38,10 +47,27 @@ function markBootAndCheckLoop() {
 }
 
 const safeModeEnabled = markBootAndCheckLoop()
+const iosWebKitDetected = detectIosWebKit()
+const stabilityModeEnabled = safeModeEnabled || iosWebKitDetected
+
+if (typeof window !== 'undefined' && stabilityModeEnabled) {
+  window.__TB_STABILITY_MODE__ = true
+  window.__TB_DISABLE_FIREBASE__ = true
+  window.__TB_DISABLE_FIREBASE_REASON__ = safeModeEnabled
+    ? 'safe-mode-reload-loop'
+    : 'ios-webkit-stability'
+  document.documentElement.dataset.stabilityMode = 'true'
+  document.documentElement.dataset.reducedEffects = 'true'
+}
+
 if (typeof window !== 'undefined' && safeModeEnabled) {
   window.__TB_SAFE_MODE__ = true
-  window.__TB_DISABLE_FIREBASE__ = true
   document.documentElement.dataset.safeMode = 'true'
+}
+
+if (typeof window !== 'undefined' && iosWebKitDetected) {
+  window.__TB_IOS_WEBKIT__ = true
+  document.documentElement.dataset.iosWebkit = 'true'
 }
 
 const root = createRoot(document.getElementById('root'))
