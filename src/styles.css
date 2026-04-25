@@ -467,11 +467,7 @@ body {
 
 @media (max-width: 760px) {
   .ambient-layer {
-    position: absolute;
-    inset: -12dvh -8vw auto;
-    height: 52dvh;
-    filter: blur(28px);
-    opacity: 0.62;
+    display: none;
   }
 
   .glass,
@@ -491,6 +487,17 @@ body {
   .filters__field--sort,
   .filters__field--difficulty {
     grid-column: 1;
+  }
+
+  .book-card::before,
+  .drawer {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .catalog-shell,
+  .catalog__item {
+    animation: none;
   }
 }
 

@@ -2,8 +2,16 @@ export const STORAGE_KEY = 'tb-reader-progress'
 const DEVICE_KEY = 'tb-device-id'
 export const MAX_NOTES_LENGTH = 5000
 
-function canUseStorage() {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+function getLocalStorageSafely() {
+  if (typeof window === 'undefined') return null
+  try {
+    const storage = window.localStorage
+    if (!storage) return null
+    storage.getItem('__tb_storage_probe__')
+    return storage
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -219,10 +227,11 @@ export function applyProgressPatch(progress, slug, patch, deviceId) {
  * @returns {Record<string, import('../types/book.js').BookProgress>}
  */
 export function loadBookProgress() {
-  if (!canUseStorage()) return {}
+  const storage = getLocalStorageSafely()
+  if (!storage) return {}
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
+    const raw = storage.getItem(STORAGE_KEY)
     if (!raw) return {}
     const parsed = JSON.parse(raw)
     return normalizeProgressMap(parsed)
@@ -235,10 +244,11 @@ export function loadBookProgress() {
  * @param {Record<string, import('../types/book.js').BookProgress>} progress
  */
 export function saveBookProgress(progress) {
-  if (!canUseStorage()) return
+  const storage = getLocalStorageSafely()
+  if (!storage) return
 
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeProgressMap(progress)))
+    storage.setItem(STORAGE_KEY, JSON.stringify(normalizeProgressMap(progress)))
   } catch {
     // Ignore local persistence failures and keep the UI responsive.
   }
@@ -252,13 +262,14 @@ function createDeviceId() {
 }
 
 export function getDeviceId() {
-  if (!canUseStorage()) return createDeviceId()
+  const storage = getLocalStorageSafely()
+  if (!storage) return createDeviceId()
 
   try {
-    const existing = window.localStorage.getItem(DEVICE_KEY)
+    const existing = storage.getItem(DEVICE_KEY)
     if (existing) return existing
     const created = createDeviceId()
-    window.localStorage.setItem(DEVICE_KEY, created)
+    storage.setItem(DEVICE_KEY, created)
     return created
   } catch {
     return createDeviceId()

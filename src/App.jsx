@@ -130,10 +130,23 @@ function buildSearchParamsFromFilters(filters) {
   return params
 }
 
-function readStoredTheme() {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null
+function getLocalStorageSafely() {
+  if (typeof window === 'undefined') return null
   try {
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+    const storage = window.localStorage
+    if (!storage) return null
+    storage.getItem('__tb_storage_probe__')
+    return storage
+  } catch {
+    return null
+  }
+}
+
+function readStoredTheme() {
+  const storage = getLocalStorageSafely()
+  if (!storage) return null
+  try {
+    const storedTheme = storage.getItem(THEME_STORAGE_KEY)
     return storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : null
   } catch {
     return null
@@ -154,9 +167,10 @@ function resolveInitialTheme() {
 }
 
 function persistTheme(theme) {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return
+  const storage = getLocalStorageSafely()
+  if (!storage) return
   try {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+    storage.setItem(THEME_STORAGE_KEY, theme)
   } catch {
     // Ignore persistence failures to keep rendering resilient on restricted browsers.
   }
