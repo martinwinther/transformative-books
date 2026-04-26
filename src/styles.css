@@ -64,16 +64,6 @@ body {
   padding: 1.2rem 1.2rem 2rem;
 }
 
-@media (hover: none) and (pointer: coarse) {
-  .catalog-shell,
-  .catalog__item,
-  .drawer-overlay,
-  .modal-overlay,
-  .drawer {
-    animation: none !important;
-  }
-}
-
 .ambient-layer {
   position: fixed;
   inset: -20dvh -15vw auto;
