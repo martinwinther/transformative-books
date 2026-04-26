@@ -65,10 +65,6 @@ body {
 }
 
 @media (hover: none) and (pointer: coarse) {
-  .ambient-layer {
-    display: none;
-  }
-
   .catalog-shell,
   .catalog__item,
   .drawer-overlay,
