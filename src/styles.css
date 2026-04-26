@@ -72,16 +72,6 @@ body {
   .drawer {
     animation: none !important;
   }
-
-  .book-card,
-  .book-card__share,
-  .theme-toggle,
-  .catalog-shell__export,
-  .drawer__amazon,
-  .drawer__goodreads,
-  .drawer__star {
-    transition: none;
-  }
 }
 
 .ambient-layer {
