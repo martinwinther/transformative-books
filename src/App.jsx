@@ -17,8 +17,6 @@ import {
 import { firebaseEnabled } from './firebase/client'
 import {
   onAuthSessionChange,
-  refreshAuthUser,
-  sendVerificationEmail,
   signInWithEmail,
   signInWithGoogle,
   signOutCurrentUser,
@@ -27,7 +25,6 @@ import {
 } from './firebase/auth'
 import {
   ensureUserProfile,
-  fetchUserProgressOnce,
   replaceUserProgress,
   setUserMigrationVersion,
   subscribeToUserProgress,
@@ -571,6 +568,22 @@ function App() {
     }
   }
 
+  const handleOpenAuth = () => {
+    setSyncError('')
+    setAuthModalError('')
+    setAuthModalOpen(true)
+  }
+
+  const handleSignOut = async () => {
+    setSyncError('')
+    try {
+      await signOutCurrentUser()
+    } catch (err) {
+      setSyncError(toReadableError(err))
+      setSyncState('error')
+    }
+  }
+
   const handleMigrationChoice = async (choice) => {
     if (!migrationState || !authSession?.uid) return
     setMigrationPending(true)
@@ -695,6 +708,39 @@ function App() {
   }
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
 
+  const handleSyncButtonClick = () => {
+    if (!firebaseEnabled || authLoading || authPending) return
+    if (authSession) {
+      void handleSignOut()
+      return
+    }
+    handleOpenAuth()
+  }
+
+  const syncButtonLabel = !firebaseEnabled
+    ? 'Sync unavailable'
+    : authLoading
+      ? 'Checking sync status'
+      : authSession
+        ? 'Sign out of sync'
+        : 'Sign in to sync'
+
+  const syncButtonTitle = !firebaseEnabled
+    ? 'Sync unavailable on this device'
+    : authLoading
+      ? 'Checking sync status'
+      : authSession
+        ? 'Sign out'
+        : 'Sign in'
+
+  const syncButtonClassName = [
+    'sync-toggle',
+    authSession ? 'sync-toggle--active' : '',
+    syncState === 'error' ? 'sync-toggle--error' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   const notesHelpText = !firebaseEnabled
     ? 'Saved locally in this browser.'
     : !authSession
@@ -711,17 +757,44 @@ function App() {
       <header className="hero">
         <div className="hero__content">
           <h1 className="hero__title">Transformative Canon</h1>
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            <span className="theme-toggle__icon" aria-hidden="true">
-              {theme === 'light' ? '◐' : '◑'}
-            </span>
-          </button>
+          <div className="hero__actions">
+            <button
+              type="button"
+              className={syncButtonClassName}
+              onClick={handleSyncButtonClick}
+              disabled={!firebaseEnabled || authLoading || authPending}
+              aria-label={syncButtonLabel}
+              title={syncButtonTitle}
+            >
+              <svg
+                className="sync-toggle__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M21 12a9 9 0 0 1-15.36 6.36M3 12a9 9 0 0 1 15.36-6.36M17 3h3v3M4 18v3h3"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              <span className="theme-toggle__icon" aria-hidden="true">
+                {theme === 'light' ? '◐' : '◑'}
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
