@@ -853,8 +853,23 @@ function App() {
                   className="catalog-shell__export"
                   onClick={handleExportVisibleBooksCsv}
                   aria-label={`Export ${filteredBooks.length} visible books as CSV`}
+                  title="Export visible books as CSV"
                 >
-                  Export CSV
+                  <svg
+                    className="catalog-shell__export-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M7 9V4h10v5M7 18h10v2H7v-2Zm12-7H5a2 2 0 0 0-2 2v3h4v-3h10v3h4v-3a2 2 0 0 0-2-2Z"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
               </div>
               <p className="catalog-shell__subtitle">Select any title to read why it belongs in the canon.</p>

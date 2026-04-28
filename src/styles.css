@@ -526,14 +526,19 @@ body {
   background: var(--chip-bg);
   color: var(--text);
   border-radius: 999px;
-  padding: 0.34rem 0.78rem;
-  min-height: 2.35rem;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  width: 2.6rem;
+  min-height: 2.6rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
+}
+
+.catalog-shell__export-icon {
+  width: 1.08rem;
+  height: 1.08rem;
 }
 
 .catalog-shell__export:hover {
@@ -1411,11 +1416,7 @@ body {
   }
 
   .catalog-shell__title-row {
-    align-items: stretch;
-  }
-
-  .catalog-shell__export {
-    width: 100%;
+    align-items: center;
   }
 
   .catalog {
