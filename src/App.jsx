@@ -235,6 +235,15 @@ async function copyTextToClipboard(text) {
   return didCopy
 }
 
+function buildBooksPlainText(books) {
+  return books
+    .map((book) => {
+      const rationale = typeof book.justification === 'string' ? book.justification.trim() : ''
+      return [book.title, book.author, rationale].filter(Boolean).join(' - ')
+    })
+    .join('\n')
+}
+
 function App() {
   const safeModeEnabled = typeof window !== 'undefined' && window.__TB_SAFE_MODE__ === true
   const initialProgress = loadBookProgress()
@@ -726,8 +735,8 @@ function App() {
   }
 
   const handleCopyVisibleBooksCsv = async () => {
-    const csvText = buildBooksCsv(filteredBooks, readerProgress)
-    await copyTextToClipboard(csvText)
+    const plainText = buildBooksPlainText(filteredBooks)
+    await copyTextToClipboard(plainText)
     setExportMenuOpen(false)
   }
 
