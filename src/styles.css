@@ -515,6 +515,11 @@ body {
   flex-wrap: wrap;
 }
 
+.catalog-shell__export-group {
+  position: relative;
+  display: inline-flex;
+}
+
 .catalog-shell__title {
   margin: 0;
   font-family: var(--font-serif);
@@ -526,11 +531,12 @@ body {
   background: var(--chip-bg);
   color: var(--text);
   border-radius: 999px;
-  width: 2.6rem;
+  min-width: 2.8rem;
   min-height: 2.6rem;
-  padding: 0;
+  padding: 0 0.7rem 0 0.72rem;
   display: inline-flex;
   align-items: center;
+  gap: 0.45rem;
   justify-content: center;
   cursor: pointer;
   transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
@@ -541,6 +547,13 @@ body {
   height: 1.08rem;
 }
 
+.catalog-shell__export-caret {
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--muted);
+  transform: translateY(-1px);
+}
+
 .catalog-shell__export:hover {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--focus), var(--surface-border) 72%);
@@ -549,6 +562,46 @@ body {
 .catalog-shell__export:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--focus), transparent 58%);
   outline-offset: 2px;
+}
+
+.catalog-shell__export-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  min-width: 10.5rem;
+  padding: 0.35rem;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-strong);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.catalog-shell__export-menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.catalog-shell__export-menu-item:hover,
+.catalog-shell__export-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--focus), transparent 88%);
+  outline: none;
+}
+
+:root[data-theme="dark"] .catalog-shell__export-menu {
+  background: rgba(17, 38, 69, 0.94);
 }
 
 .catalog-shell__subtitle {
@@ -1417,6 +1470,10 @@ body {
 
   .catalog-shell__title-row {
     align-items: center;
+  }
+
+  .catalog-shell__export-menu {
+    min-width: 11.5rem;
   }
 
   .catalog {

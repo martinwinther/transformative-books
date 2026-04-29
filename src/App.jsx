@@ -269,6 +269,8 @@ function App() {
   const [authModalError, setAuthModalError] = useState('')
   const [migrationState, setMigrationState] = useState(null)
   const [migrationPending, setMigrationPending] = useState(false)
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const exportMenuRef = useRef(null)
 
   useEffect(() => {
     migrationStateRef.current = migrationState
@@ -390,6 +392,29 @@ function App() {
       window.removeEventListener('hashchange', syncSelectedBookFromHash)
     }
   }, [books, canonFilter])
+
+  useEffect(() => {
+    if (!exportMenuOpen) return
+
+    const handlePointerDown = (event) => {
+      if (exportMenuRef.current?.contains(event.target)) return
+      setExportMenuOpen(false)
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setExportMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [exportMenuOpen])
 
   useEffect(() => {
     if (!genreFilter) return
@@ -697,6 +722,13 @@ function App() {
     const csvText = buildBooksCsv(filteredBooks, readerProgress)
     const fileName = buildBooksCsvFileName({ canonFilter })
     downloadCsvFile(fileName, csvText)
+    setExportMenuOpen(false)
+  }
+
+  const handleCopyVisibleBooksCsv = async () => {
+    const csvText = buildBooksCsv(filteredBooks, readerProgress)
+    await copyTextToClipboard(csvText)
+    setExportMenuOpen(false)
   }
 
   const availableGenres = Array.from(
@@ -848,29 +880,62 @@ function App() {
             <div className="catalog-shell__header">
               <div className="catalog-shell__title-row">
                 <h2 className="catalog-shell__title">Browse the library</h2>
-                <button
-                  type="button"
-                  className="catalog-shell__export"
-                  onClick={handleExportVisibleBooksCsv}
-                  aria-label={`Export ${filteredBooks.length} visible books as CSV`}
-                  title="Export visible books as CSV"
-                >
-                  <svg
-                    className="catalog-shell__export-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M7 9V4h10v5M7 18h10v2H7v-2Zm12-7H5a2 2 0 0 0-2 2v3h4v-3h10v3h4v-3a2 2 0 0 0-2-2Z"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                  <div className="catalog-shell__export-group" ref={exportMenuRef}>
+                    <button
+                      type="button"
+                      className="catalog-shell__export"
+                      onClick={() => setExportMenuOpen((previous) => !previous)}
+                      aria-label={`Export or copy ${filteredBooks.length} visible books`}
+                      aria-haspopup="menu"
+                      aria-expanded={exportMenuOpen}
+                      aria-controls="catalog-shell-export-menu"
+                      title="Export or copy visible books"
+                    >
+                      <svg
+                        className="catalog-shell__export-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M7 9V4h10v5M7 18h10v2H7v-2Zm12-7H5a2 2 0 0 0-2 2v3h4v-3h10v3h4v-3a2 2 0 0 0-2-2Z"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span className="catalog-shell__export-caret" aria-hidden="true">
+                        ▾
+                      </span>
+                    </button>
+                    {exportMenuOpen && (
+                      <div
+                        id="catalog-shell-export-menu"
+                        className="catalog-shell__export-menu"
+                        role="menu"
+                        aria-label="Export options"
+                      >
+                        <button
+                          type="button"
+                          className="catalog-shell__export-menu-item"
+                          onClick={handleExportVisibleBooksCsv}
+                          role="menuitem"
+                        >
+                          Download CSV
+                        </button>
+                        <button
+                          type="button"
+                          className="catalog-shell__export-menu-item"
+                          onClick={handleCopyVisibleBooksCsv}
+                          role="menuitem"
+                        >
+                          Copy as text
+                        </button>
+                      </div>
+                    )}
+                  </div>
               </div>
               <p className="catalog-shell__subtitle">Select any title to read why it belongs in the canon.</p>
               <p className="filters__count">Showing {filteredBooks.length} books</p>
