@@ -782,6 +782,10 @@ function App() {
     .filter(Boolean)
     .join(' ')
 
+  const userInitials = authSession?.email
+    ? authSession.email.split('@')[0].slice(0, 2).toUpperCase()
+    : ''
+
   const notesHelpText = !firebaseEnabled
     ? 'Saved locally in this browser.'
     : !authSession
@@ -799,6 +803,11 @@ function App() {
         <div className="hero__content">
           <h1 className="hero__title">Transformative Canon</h1>
           <div className="hero__actions">
+            {authSession && (
+              <div className="user-indicator" title={authSession.email} aria-hidden={false}>
+                <div className="user-indicator__badge">{userInitials}</div>
+              </div>
+            )}
             <button
               type="button"
               className={syncButtonClassName}
@@ -814,13 +823,23 @@ function App() {
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
-                <path
-                  d="M21 12a9 9 0 0 1-15.36 6.36M3 12a9 9 0 0 1 15.36-6.36M17 3h3v3M4 18v3h3"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                {authSession ? (
+                  <path
+                    d="M5 13l4 4L19 7"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ) : (
+                  <path
+                    d="M21 12a9 9 0 0 1-15.36 6.36M3 12a9 9 0 0 1 15.36-6.36M17 3h3v3M4 18v3h3"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
               </svg>
             </button>
 
