@@ -35,6 +35,7 @@ import BookCard from './components/BookCard.jsx'
 import BookDrawer from './components/BookDrawer.jsx'
 import FiltersBar from './components/FiltersBar.jsx'
 import MigrationDialog from './components/MigrationDialog.jsx'
+import SignOutConfirm from './components/SignOutConfirm.jsx'
 import {
   buildBooksCsv,
   buildBooksCsvFileName,
@@ -278,6 +279,7 @@ function App() {
   const [authModalError, setAuthModalError] = useState('')
   const [migrationState, setMigrationState] = useState(null)
   const [migrationPending, setMigrationPending] = useState(false)
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const exportMenuRef = useRef(null)
 
@@ -609,6 +611,7 @@ function App() {
   }
 
   const handleSignOut = async () => {
+    setSignOutConfirmOpen(false)
     setSyncError('')
     try {
       await signOutCurrentUser()
@@ -752,7 +755,7 @@ function App() {
   const handleSyncButtonClick = () => {
     if (!firebaseEnabled || authLoading || authPending) return
     if (authSession) {
-      void handleSignOut()
+      setSignOutConfirmOpen(true)
       return
     }
     handleOpenAuth()
@@ -1003,6 +1006,15 @@ function App() {
         onEmailSignIn={(email, password) => runAuthAction(() => signInWithEmail(email, password))}
         onEmailSignUp={(email, password) => runAuthAction(() => signUpWithEmail(email, password))}
         onGoogleSignIn={() => runAuthAction(() => signInWithGoogle())}
+      />
+
+      <SignOutConfirm
+        open={signOutConfirmOpen}
+        pending={false}
+        onCancel={() => setSignOutConfirmOpen(false)}
+        onConfirm={() => {
+          void handleSignOut()
+        }}
       />
 
       <MigrationDialog
