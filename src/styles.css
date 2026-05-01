@@ -590,7 +590,7 @@ body {
   top: calc(100% + 0.5rem);
   right: 0;
   z-index: 20;
-  min-width: 10.5rem;
+  min-width: 11.2rem;
   padding: 0.35rem;
   border-radius: 16px;
   border: 1px solid var(--surface-border);

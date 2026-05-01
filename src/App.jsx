@@ -743,6 +743,107 @@ function App() {
     setExportMenuOpen(false)
   }
 
+  const handlePrintVisibleBooks = () => {
+    const printWindow = window.open('', '', 'width=800,height=600')
+    if (!printWindow) return
+
+    const bookListHtml = filteredBooks
+      .map((book) => {
+        const rationale = typeof book.justification === 'string' ? book.justification.trim() : ''
+        return `
+          <div class="print-book-item">
+            <div class="print-book-title">${escapeHtml(book.title)}</div>
+            <div class="print-book-author">${escapeHtml(book.author)}</div>
+            ${rationale ? `<div class="print-book-rationale">${escapeHtml(rationale)}</div>` : ''}
+          </div>
+        `
+      })
+      .join('')
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Transformative Books - ${canonFilter === 'all' ? 'All Canons' : canonFilter.charAt(0).toUpperCase() + canonFilter.slice(1)}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #13233a;
+            background: white;
+            padding: 2rem;
+          }
+          .print-container {
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          h1 {
+            font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #13233a;
+          }
+          .print-subtitle {
+            font-size: 0.95rem;
+            color: #3f5472;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #c8d8eb;
+            padding-bottom: 1rem;
+          }
+          .print-book-item {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e0e8f0;
+          }
+          .print-book-item:last-child {
+            border-bottom: none;
+          }
+          .print-book-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #13233a;
+            margin-bottom: 0.3rem;
+          }
+          .print-book-author {
+            font-size: 0.95rem;
+            color: #3f5472;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+          }
+          .print-book-rationale {
+            font-size: 0.9rem;
+            color: #334d70;
+            line-height: 1.7;
+          }
+          @media print {
+            body { padding: 1.5rem; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-container">
+          <h1>Transformative Books</h1>
+          <div class="print-subtitle">${filteredBooks.length} books from the ${canonFilter === 'all' ? 'canon' : canonFilter + ' canon'}</div>
+          ${bookListHtml}
+        </div>
+      </body>
+      </html>
+    `
+
+    printWindow.document.write(html)
+    printWindow.document.close()
+    setTimeout(() => printWindow.print(), 250)
+    setExportMenuOpen(false)
+  }
+
+  const escapeHtml = (text) => {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+  }
+
   const availableGenres = Array.from(
     new Set(books.flatMap((book) => book.genres))
   ).sort((a, b) => a.localeCompare(b))
@@ -963,6 +1064,14 @@ function App() {
                           role="menuitem"
                         >
                           Copy as text
+                        </button>
+                        <button
+                          type="button"
+                          className="catalog-shell__export-menu-item"
+                          onClick={handlePrintVisibleBooks}
+                          role="menuitem"
+                        >
+                          Print list
                         </button>
                       </div>
                     )}
