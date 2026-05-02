@@ -159,7 +159,10 @@ body {
 
 .sync-toggle--active {
   border-color: color-mix(in srgb, var(--focus), var(--surface-border) 52%);
-  background: color-mix(in srgb, var(--chip-bg), var(--focus) 18%);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--focus), transparent 18%),
+    color-mix(in srgb, var(--chip-bg), var(--focus) 12%)
+  );
 }
 
 .sync-toggle--error {
@@ -202,7 +205,7 @@ body {
   justify-content: center;
   font-weight: 700;
   color: var(--text-inverse);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--focus), transparent 18%), color-mix(in srgb, var(--chip-bg), var(--focus) 8%));
+  background: var(--focus);
   border: 1px solid color-mix(in srgb, var(--surface-border), var(--focus) 18%);
   box-shadow: var(--shadow);
   font-size: 0.85rem;
