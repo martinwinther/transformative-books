@@ -52,15 +52,13 @@ const stabilityModeEnabled = safeModeEnabled || iosWebKitDetected
 
 if (typeof window !== 'undefined' && stabilityModeEnabled) {
   window.__TB_STABILITY_MODE__ = true
-  window.__TB_DISABLE_FIREBASE__ = true
-  window.__TB_DISABLE_FIREBASE_REASON__ = safeModeEnabled
-    ? 'safe-mode-reload-loop'
-    : 'ios-webkit-stability'
   document.documentElement.dataset.stabilityMode = 'true'
   document.documentElement.dataset.reducedEffects = 'true'
 }
 
 if (typeof window !== 'undefined' && safeModeEnabled) {
+  window.__TB_DISABLE_FIREBASE__ = true
+  window.__TB_DISABLE_FIREBASE_REASON__ = 'safe-mode-reload-loop'
   window.__TB_SAFE_MODE__ = true
   document.documentElement.dataset.safeMode = 'true'
 }
