@@ -880,14 +880,17 @@ function App() {
 
   const syncButtonClassName = [
     'sync-toggle',
+    authSession ? 'sync-toggle--initials' : '',
     authSession ? 'sync-toggle--active' : '',
     syncState === 'error' ? 'sync-toggle--error' : '',
   ]
     .filter(Boolean)
     .join(' ')
 
-  const userInitials = authSession?.email
-    ? authSession.email.split('@')[0].slice(0, 2).toUpperCase()
+  const userInitials = authSession
+    ? authSession.email
+      ? authSession.email.split('@')[0].slice(0, 2).toUpperCase()
+      : 'ME'
     : ''
 
   const notesHelpText = !firebaseEnabled
@@ -907,11 +910,6 @@ function App() {
         <div className="hero__content">
           <h1 className="hero__title">Transformative Canon</h1>
           <div className="hero__actions">
-            {authSession && (
-              <div className="user-indicator" title={authSession.email} aria-hidden={false}>
-                <div className="user-indicator__badge">{userInitials}</div>
-              </div>
-            )}
             <button
               type="button"
               className={syncButtonClassName}
@@ -920,22 +918,18 @@ function App() {
               aria-label={syncButtonLabel}
               title={syncButtonTitle}
             >
-              <svg
-                className="sync-toggle__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                {authSession ? (
-                  <path
-                    d="M5 13l4 4L19 7"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                ) : (
+              {authSession ? (
+                <span className="sync-toggle__initials" aria-hidden="true">
+                  {userInitials}
+                </span>
+              ) : (
+                <svg
+                  className="sync-toggle__icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
                   <path
                     d="M21 12a9 9 0 0 1-15.36 6.36M3 12a9 9 0 0 1 15.36-6.36M17 3h3v3M4 18v3h3"
                     stroke="currentColor"
@@ -943,8 +937,8 @@ function App() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                )}
-              </svg>
+                </svg>
+              )}
             </button>
 
             <button

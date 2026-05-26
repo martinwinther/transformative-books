@@ -157,6 +157,12 @@ body {
   justify-content: center;
 }
 
+.sync-toggle--initials {
+  width: auto;
+  min-width: 2.75rem;
+  padding: 0 0.72rem;
+}
+
 .sync-toggle--active {
   border-color: color-mix(in srgb, var(--focus), var(--surface-border) 52%);
   background: linear-gradient(135deg,
@@ -190,25 +196,12 @@ body {
   height: 1.1rem;
 }
 
-.user-indicator {
-  display: inline-flex;
-  align-items: center;
-  margin-right: 0.35rem;
-}
-
-.user-indicator__badge {
-  min-width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: var(--text-inverse);
-  background: var(--focus);
-  border: 1px solid color-mix(in srgb, var(--surface-border), var(--focus) 18%);
-  box-shadow: var(--shadow);
+.sync-toggle__initials {
   font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-transform: uppercase;
 }
 
 .theme-toggle:hover,
