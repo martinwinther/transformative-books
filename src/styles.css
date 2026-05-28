@@ -169,10 +169,7 @@ body {
 
 .sync-toggle--active {
   border-color: color-mix(in srgb, var(--focus), var(--surface-border) 52%);
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--focus), transparent 18%),
-    color-mix(in srgb, var(--chip-bg), var(--focus) 12%)
-  );
+  background: var(--focus);
 }
 
 .sync-toggle--error {
