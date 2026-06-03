@@ -12,3 +12,5 @@ dist
 
 # Generated books API artifact
 public/api/v1/books.json
+.apply_batch.py
+.batch.py
