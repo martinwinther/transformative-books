@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   CANON_OPTIONS,
   loadBooks,
@@ -251,7 +251,6 @@ function App() {
   const [initialFilters] = useState(() => parseFiltersFromSearch(window.location.search))
   const [canonFilter, setCanonFilter] = useState(initialFilters.canonFilter)
   const [books, setBooks] = useState([])
-  const [filteredBooks, setFilteredBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedBook, setSelectedBook] = useState(null)
@@ -303,7 +302,6 @@ function App() {
       .then((data) => {
         if (!isActive) return
         setBooks(data)
-        setFilteredBooks(data)
         setLoading(false)
       })
       .catch((err) => {
@@ -434,37 +432,6 @@ function App() {
       setGenreFilter('')
     }
   }, [books, genreFilter])
-
-  useEffect(() => {
-    let next = books.filter((book) => {
-      const matchSearch =
-        !searchQuery ||
-        [book.title, book.author, book.justification, ...book.genres].some((s) =>
-          s.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      const matchRating = ratingFilter == null || book.rating === ratingFilter
-      const matchGenre = !genreFilter || book.genres.includes(genreFilter)
-      const progress = readerProgress[book.slug]
-      const isRead = progress?.isRead === true
-      const isOwned = progress?.owns === true
-      const matchRead =
-        readFilter === 'all' ||
-        (readFilter === 'read' && isRead) ||
-        (readFilter === 'unread' && !isRead)
-      const matchOwned =
-        ownedFilter === 'all' ||
-        (ownedFilter === 'owned' && isOwned) ||
-        (ownedFilter === 'unowned' && !isOwned)
-      return matchSearch && matchRating && matchGenre && matchRead && matchOwned
-    })
-
-    if (sortBy === 'rating-asc') {
-      next = [...next].sort((a, b) => a.rating - b.rating || a.title.localeCompare(b.title))
-    } else {
-      next = [...next].sort((a, b) => a.title.localeCompare(b.title))
-    }
-    setFilteredBooks(next)
-  }, [books, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, readerProgress])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -844,9 +811,42 @@ function App() {
     return div.innerHTML
   }
 
-  const availableGenres = Array.from(
-    new Set(books.flatMap((book) => book.genres))
-  ).sort((a, b) => a.localeCompare(b))
+  const filteredBooks = useMemo(() => {
+    let next = books.filter((book) => {
+      const matchSearch =
+        !searchQuery ||
+        [book.title, book.author, book.justification, ...book.genres].some((s) =>
+          s.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      const matchRating = ratingFilter == null || book.rating === ratingFilter
+      const matchGenre = !genreFilter || book.genres.includes(genreFilter)
+      const progress = readerProgress[book.slug]
+      const isRead = progress?.isRead === true
+      const isOwned = progress?.owns === true
+      const matchRead =
+        readFilter === 'all' ||
+        (readFilter === 'read' && isRead) ||
+        (readFilter === 'unread' && !isRead)
+      const matchOwned =
+        ownedFilter === 'all' ||
+        (ownedFilter === 'owned' && isOwned) ||
+        (ownedFilter === 'unowned' && !isOwned)
+      return matchSearch && matchRating && matchGenre && matchRead && matchOwned
+    })
+
+    if (sortBy === 'rating-asc') {
+      next = [...next].sort((a, b) => a.rating - b.rating || a.title.localeCompare(b.title))
+    } else {
+      next = [...next].sort((a, b) => a.title.localeCompare(b.title))
+    }
+
+    return next
+  }, [books, searchQuery, ratingFilter, genreFilter, readFilter, ownedFilter, sortBy, readerProgress])
+
+  const availableGenres = useMemo(
+    () => Array.from(new Set(books.flatMap((book) => book.genres))).sort((a, b) => a.localeCompare(b)),
+    [books]
+  )
   const handleCloseDrawer = () => {
     setSelectedBook(null)
     setBookHash('')

@@ -644,6 +644,8 @@ body {
 .catalog__item {
   min-width: 0;
   animation: stagger 420ms ease-out both;
+  content-visibility: auto;
+  contain-intrinsic-size: 24rem;
 }
 
 .catalog__item:nth-child(2) { animation-delay: 50ms; }
@@ -666,6 +668,7 @@ body {
   padding: 1rem;
   cursor: pointer;
   transition: transform 210ms ease, box-shadow 210ms ease, border-color 210ms ease;
+  contain: layout paint style;
 }
 
 .book-card::before {
@@ -675,8 +678,6 @@ body {
   z-index: 0;
   border-radius: inherit;
   background: color-mix(in srgb, var(--surface-strong), #ffffff 16%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   pointer-events: none;
 }
 
@@ -826,6 +827,7 @@ body {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.55;
+  line-clamp: 4;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
@@ -842,6 +844,7 @@ body {
   color: var(--text);
   font-size: 0.85rem;
   line-height: 1.5;
+  line-clamp: 3;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
