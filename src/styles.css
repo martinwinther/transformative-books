@@ -663,27 +663,12 @@ body {
   overflow: hidden;
   border-radius: 20px;
   border: 1px solid var(--surface-border);
-  background: transparent;
+  background: color-mix(in srgb, var(--surface-strong), #ffffff 16%);
   box-shadow: var(--shadow);
   padding: 1rem;
   cursor: pointer;
   transition: transform 210ms ease, box-shadow 210ms ease, border-color 210ms ease;
   contain: layout paint style;
-}
-
-.book-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: color-mix(in srgb, var(--surface-strong), #ffffff 16%);
-  pointer-events: none;
-}
-
-.book-card > * {
-  position: relative;
-  z-index: 1;
 }
 
 .book-card:hover {
